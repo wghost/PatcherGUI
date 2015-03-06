@@ -17,6 +17,7 @@ make
 Proper directory structure:
 ===========================
 To run PatcherGUI you need to set up a proper directory structure:
+```
 PatcherGUI/
   binaries/
     DecompressLZO
@@ -24,5 +25,5 @@ PatcherGUI/
   favicon.ico
   PatcherGUI
   PatcherGUIReadme.txt
-
+```
 DecompressLZO and PatchUPK are part of UPKUtils project: https://github.com/wghost/UPKUtils
