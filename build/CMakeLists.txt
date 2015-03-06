@@ -1,0 +1,23 @@
+PROJECT(XCOMLZO)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+IF(COMMAND cmake_policy)
+  CMAKE_POLICY(SET CMP0003 NEW)
+ENDIF(COMMAND cmake_policy)
+
+SET(CMAKE_BUILD_TYPE Release)
+SET(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -Wall -fexceptions -O2")
+
+IF(wxWidgets_USE_MONOLITHIC)
+SET(wxWidgets_USE_LIBS mono richtext)
+ELSE(wxWidgets_USE_MONOLITHIC)
+SET(wxWidgets_USE_LIBS base core richtext)
+ENDIF(wxWidgets_USE_MONOLITHIC)
+
+FIND_PACKAGE(wxWidgets)
+IF(wxWidgets_FOUND)
+  INCLUDE(${wxWidgets_USE_FILE})
+  ADD_EXECUTABLE(PatcherGUI ../PatcherGUIApp.cpp ../PatcherGUIApp.h ../PatcherGUIMain.cpp ../PatcherGUIMain.h ../SettingsDialog.cpp ../SettingsDialog.h ../ShowDebugLogDialog.cpp ../ShowDebugLogDialog.h ../ViewLog.cpp ../ViewLog.h)
+  TARGET_LINK_LIBRARIES(PatcherGUI ${wxWidgets_LIBRARIES})
+ELSE(wxWidgets_FOUND)
+  MESSAGE("wxWidgets not found!")
+ENDIF(wxWidgets_FOUND)

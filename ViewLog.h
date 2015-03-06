@@ -2,13 +2,13 @@
 #define VIEWLOG_H
 
 //(*Headers(ViewLog)
+#include <wx/dialog.h>
 #include <wx/sizer.h>
+#include <wx/button.h>
+#include <wx/panel.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 #include <wx/listbox.h>
-#include <wx/panel.h>
-#include <wx/button.h>
-#include <wx/dialog.h>
 //*)
 
 #include <wx/arrstr.h>
@@ -28,16 +28,16 @@ class ViewLog: public wxDialog
 		bool IsBatch() { return bBatch; }
 
 		//(*Declarations(ViewLog)
-		wxButton* Button4;
-		wxStaticText* StaticText2;
-		wxButton* Button1;
 		wxPanel* Panel1;
-		wxStaticText* StaticText1;
-		wxButton* Button2;
-		wxButton* Button5;
-		wxButton* Button3;
-		wxTextCtrl* TextCtrl1;
 		wxListBox* ListBox1;
+		wxButton* Button4;
+		wxButton* Button1;
+		wxButton* Button2;
+		wxButton* Button3;
+		wxStaticText* StaticText1;
+		wxButton* Button5;
+		wxTextCtrl* TextCtrl1;
+		wxStaticText* StaticText2;
 		//*)
 
 	protected:

@@ -1,8 +1,8 @@
 #include "ViewLog.h"
 
 //(*InternalHeaders(ViewLog)
-#include <wx/intl.h>
 #include <wx/string.h>
+#include <wx/intl.h>
 //*)
 
 //(*IdInit(ViewLog)
@@ -26,10 +26,10 @@ END_EVENT_TABLE()
 ViewLog::ViewLog(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxSize& size)
 {
 	//(*Initialize(ViewLog)
-	wxBoxSizer* BoxSizer2;
-	wxBoxSizer* BoxSizer1;
 	wxFlexGridSizer* FlexGridSizer1;
 	wxBoxSizer* BoxSizer3;
+	wxBoxSizer* BoxSizer2;
+	wxBoxSizer* BoxSizer1;
 
 	Create(parent, id, _("Install Log"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER, _T("id"));
 	SetClientSize(wxDefaultSize);
@@ -128,7 +128,8 @@ void ViewLog::OnCloseLog(wxCommandEvent& event)
 void ViewLog::SetParams(wxString GamePath, wxArrayString ModList)
 {
     TextCtrl1->SetValue(GamePath);
-    ListBox1->InsertItems(GetModNames(ModList), 0);
+    if (ModList.size() > 0)
+        ListBox1->InsertItems(GetModNames(ModList), 0);
 }
 
 wxArrayString ViewLog::GetModNames(wxArrayString ModList)

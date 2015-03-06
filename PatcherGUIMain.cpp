@@ -23,13 +23,16 @@
 #include <fstream>
 #include <sstream>
 #include <functional>
+#include <algorithm>
+
+#define COOKED_DIR "/xcomgame/cookedpcconsole"
 
 //(*InternalHeaders(PatcherGUIFrame)
+#include <wx/string.h>
+#include <wx/intl.h>
 #include <wx/bitmap.h>
 #include <wx/icon.h>
-#include <wx/intl.h>
 #include <wx/image.h>
-#include <wx/string.h>
 //*)
 
 //(*IdInit(PatcherGUIFrame)
@@ -69,9 +72,9 @@ PatcherGUIFrame::PatcherGUIFrame(wxWindow* parent,wxWindowID id)
 {
     //(*Initialize(PatcherGUIFrame)
     wxFlexGridSizer* FlexGridSizer2;
+    wxBoxSizer* BoxSizer3;
     wxBoxSizer* BoxSizer2;
     wxBoxSizer* BoxSizer1;
-    wxBoxSizer* BoxSizer3;
 
     Create(parent, wxID_ANY, _("XCOM UPK Patcher"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("wxID_ANY"));
     {
@@ -85,7 +88,6 @@ PatcherGUIFrame::PatcherGUIFrame(wxWindow* parent,wxWindowID id)
     FlexGridSizer2 = new wxFlexGridSizer(0, 2, 0, 0);
     FlexGridSizer2->AddGrowableCol(0);
     FlexGridSizer2->AddGrowableRow(2);
-    FlexGridSizer2->AddGrowableRow(3);
     TextCtrl1 = new wxTextCtrl(Panel1, ID_TEXTCTRL1, _("Path to XCOM:EU or XCOM:EW"), wxDefaultPosition, wxDefaultSize, wxTE_READONLY, wxDefaultValidator, _T("ID_TEXTCTRL1"));
     TextCtrl1->SetToolTip(_("Path to XCOM:EU or XCOM:EW"));
     FlexGridSizer2->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
@@ -99,7 +101,8 @@ PatcherGUIFrame::PatcherGUIFrame(wxWindow* parent,wxWindowID id)
     Button9->SetToolTip(_("Open mod file"));
     FlexGridSizer2->Add(Button9, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     RichTextCtrl1 = new wxRichTextCtrl(Panel1, ID_RICHTEXTCTRL1, wxEmptyString, wxDefaultPosition, wxSize(575,353), wxRE_MULTILINE|wxWANTS_CHARS, wxDefaultValidator, _T("ID_RICHTEXTCTRL1"));
-    	wxRichTextAttr rchtxtAttr_1;
+    wxRichTextAttr rchtxtAttr_1;
+    rchtxtAttr_1.SetBulletStyle(wxTEXT_ATTR_BULLET_STYLE_ALIGN_LEFT);
     RichTextCtrl1->SetToolTip(_("View and edit mod file"));
     FlexGridSizer2->Add(RichTextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer3 = new wxBoxSizer(wxVERTICAL);
@@ -195,9 +198,9 @@ PatcherGUIFrame::PatcherGUIFrame(wxWindow* parent,wxWindowID id)
     bSelectFile = false;
     if (!LoadCFG())
     {
-        BackupPathString = wxGetCwd() + "/Backup";
-        PatchUPKprogram = wxGetCwd() + "/Binaries/PatchUPK.exe";
-        DecompressProgram = wxGetCwd() + "/Binaries/Decompress.exe";
+        BackupPathString = wxGetCwd() + "/backup";
+        PatchUPKprogram = wxGetCwd() + "/binaries/PatchUPK";
+        DecompressProgram = wxGetCwd() + "/binaries/DecompressLZO";
     }
     curBackupPathString = "";
     ProgLog = "";
@@ -238,7 +241,7 @@ bool PatcherGUIFrame::LoadCFG()
     {
         std::string str = "";
         getline(cfg, str);
-        if (wxDirExists(str + "/XComGame/CookedPCConsole"))
+        if (wxDirExists(str + COOKED_DIR))
         {
             TextCtrl1->SetValue(str);
             bSelectPath = true;
@@ -264,13 +267,13 @@ bool PatcherGUIFrame::SaveCFG()
             TextCtrl1->SetValue(wxGetCwd());
         cfg << TextCtrl1->GetValue() << std::endl;
         if (!wxDirExists(BackupPathString))
-            BackupPathString = wxGetCwd() + "/Binaries/Backup";
+            BackupPathString = wxGetCwd() + "/binaries/Backup";
         cfg << BackupPathString << std::endl;
         if (!wxFileExists(PatchUPKprogram))
-            PatchUPKprogram = wxGetCwd() + "/Binaries/PatchUPK.exe";
+            PatchUPKprogram = wxGetCwd() + "/binaries/PatchUPK";
         cfg << PatchUPKprogram << std::endl;
         if (!wxFileExists(DecompressProgram))
-            DecompressProgram = wxGetCwd() + "/Binaries/Decompress.exe";
+            DecompressProgram = wxGetCwd() + "/binaries/DecompressLZO";
         cfg << DecompressProgram << std::endl;
         return true;
     }
@@ -317,7 +320,17 @@ void PatcherGUIFrame::OnSelectDirectory(wxCommandEvent& event)
     wxString defDir = TextCtrl1->GetValue();
 
     if (!wxDirExists(defDir))
-        defDir = "";
+    {
+        #ifdef __WXGTK__
+        defDir = wxGetHomeDir() + "/.local/share/Steam/SteamApps/common/XCom-Enemy-Unknown";
+        #elif defined __WXMSW__
+        defDir = "C:/Program Files/Steam/SteamApps/common/XCom-Enemy-Unknown";
+        #elif defined __WXOSX_MAC__
+        defDir = wxGetHomeDir() + "/Library/Applicationsupport/Steam/Steamapps/Common/XCom-Enemy-Unknown";
+        #endif
+        if (!wxDirExists(defDir))
+            defDir = "";
+    }
 
     wxDirDialog dirDialog(NULL, _("Select a directory"), defDir, wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
 
@@ -340,7 +353,7 @@ void PatcherGUIFrame::LoadLogs()
     std::hash<std::string> StrHash;
     size_t HashVal = StrHash(TextCtrl1->GetValue().ToStdString());
 
-    InstLogName << wxGetCwd() << "/Logs/" << HashVal << "-log.txt";
+    InstLogName << wxGetCwd() << "/logs/" << HashVal << "-log.txt";
     if (wxFileExists(InstLogName) == false)
         return;
 
@@ -359,8 +372,8 @@ void PatcherGUIFrame::LoadLogs()
 
 void PatcherGUIFrame::SaveLogs()
 {
-    if (!wxDirExists(wxGetCwd() + "/Logs"))
-        if (!wxMkdir(wxGetCwd() + "/Logs"))
+    if (!wxDirExists(wxGetCwd() + "/logs"))
+        if (!wxMkdir(wxGetCwd() + "/logs"))
         {
             wxMessageBox(_("Can't create logs dir!"), _("Error"), wxICON_ERROR | wxOK, this);
             return;
@@ -383,15 +396,15 @@ void PatcherGUIFrame::OnSelectModFile(wxCommandEvent& event)
             return;
     }
 
-    wxString defDir = wxGetCwd() + "/Mods";
+    wxString defDir = wxGetCwd() + "/mods";
 
     if (RichTextCtrl1->GetFilename() != wxEmptyString)
         wxFileName::SplitPath(RichTextCtrl1->GetFilename(), &defDir, NULL, NULL);
 
     if (!wxDirExists(defDir))
-        defDir = "";
+        defDir = wxGetCwd();
 
-    wxFileDialog openFileDialog(this, _("Select mod file"), defDir, "", "Text files (*.txt)|*.txt|PatcherGUI batch files (*.pgui)|*.pgui", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+    wxFileDialog openFileDialog(this, _("Select mod file"), defDir, "", "PatcherGUI files (*.txt;*.pgui)|*.txt;*.pgui|Text files (*.txt)|*.txt|PatcherGUI batch files (*.pgui)|*.pgui|All files|*.*", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
     if (openFileDialog.ShowModal() == wxID_CANCEL)
         return;
@@ -437,7 +450,7 @@ void PatcherGUIFrame::OnInstallMod(wxCommandEvent& event)
         wxMessageBox(_("No mod file has been selected!"), _("Error"), wxICON_ERROR | wxOK, this);
         return;
     }
-    if (!wxDirExists(TextCtrl1->GetValue() + "/XComGame/CookedPCConsole"))
+    if (!wxDirExists(TextCtrl1->GetValue() + COOKED_DIR))
     {
         wxMessageBox(_("Incorrect path to XCOM directory!"), _("Error"), wxICON_ERROR | wxOK, this);
         return;
@@ -449,7 +462,7 @@ void PatcherGUIFrame::OnInstallMod(wxCommandEvent& event)
     }
     wxString filename = TextCtrl2->GetValue();
     wxString filecontext = RichTextCtrl1->GetValue();
-    bool ret;
+    bool ret = false;
     if (filename.rfind(".pgui") != std::string::npos)
     {
         wxArrayString BatchList;
@@ -504,9 +517,10 @@ bool PatcherGUIFrame::InstallMod(wxString& filename, wxString& str)
         wxString upkFile = str.substr(eqPos + 1, str.find_first_of('.', pos) + 3 - eqPos);
         upkFile = upkFile.substr(upkFile.find_first_not_of(" "));
         upkFile = upkFile.substr(0, upkFile.find_last_not_of(" ") + 1);
+        std::transform(upkFile.begin(), upkFile.end(), upkFile.begin(), ::tolower);
         FilesToBackup.Add(upkFile);
-        wxString sizeFile = TextCtrl1->GetValue() + "/XComGame/CookedPCConsole/" + upkFile + ".uncompressed_size";
-        if (NeedDecompression(TextCtrl1->GetValue() + "/XComGame/CookedPCConsole/" + upkFile))
+        wxString sizeFile = TextCtrl1->GetValue() + COOKED_DIR + "/" + upkFile + ".uncompressed_size";
+        if (NeedDecompression(TextCtrl1->GetValue() + COOKED_DIR + "/" + upkFile))
         {
             FilesToDecompress.Add(upkFile);
             if (wxFileExists(sizeFile))
@@ -534,7 +548,7 @@ bool PatcherGUIFrame::InstallMod(wxString& filename, wxString& str)
     wxString executePatchUPKcommandLineString = "\"" + PatchUPKprogram.c_str() + "\"";
     executePatchUPKcommandLineString += " \"" + filename.c_str() + "\"";
     if (bSelectPath)
-        executePatchUPKcommandLineString += " \"" + TextCtrl1->GetValue().c_str() + "/XComGame/CookedPCConsole\"";
+        executePatchUPKcommandLineString += " \"" + TextCtrl1->GetValue().c_str() + COOKED_DIR + "\"";
 
     wxExecuteEnv env;
     env.cwd = wxPathOnly(filename);
@@ -608,7 +622,7 @@ wxString PatcherGUIFrame::GetLatestUninstallFile(wxString InstallFile)
     wxString Name, prevName;
     unsigned i = 0;
     Name << InstallFile << ".uninstall.txt";
-    prevName = "Error.uninstall.txt";
+    prevName = "error.uninstall.txt";
     while (wxFileExists(Name) == true)
     {
         ++i;
@@ -628,8 +642,8 @@ bool PatcherGUIFrame::RestoreFromBackup()
 
     for (unsigned i = 0; i < FilesToBackup.GetCount(); ++i)
     {
-        wxString copyFromPath = curBackupPathString + wxString("/") + FilesToBackup[i];
-        wxString copyToPath = TextCtrl1->GetValue() + wxString("/XComGame/CookedPCConsole/") + FilesToBackup[i];
+        wxString copyFromPath = curBackupPathString + "/" + FilesToBackup[i];
+        wxString copyToPath = TextCtrl1->GetValue() + COOKED_DIR + "/" + FilesToBackup[i];
         if (!wxCopyFile(copyFromPath, copyToPath, true))
         {
             wxMessageBox(_("Can't restore from backup!"), _("Error"), wxICON_ERROR | wxOK, this);
@@ -673,8 +687,8 @@ bool PatcherGUIFrame::MakeBackups()
 
     for (unsigned i = 0; i < FilesToBackup.GetCount(); ++i)
     {
-        wxString copyToPath = curBackupPathString + wxString("/") + FilesToBackup[i];
-        wxString copyFromPath = TextCtrl1->GetValue() + wxString("/XComGame/CookedPCConsole/") + FilesToBackup[i];
+        wxString copyToPath = curBackupPathString + "/" + FilesToBackup[i];
+        wxString copyFromPath = TextCtrl1->GetValue() + COOKED_DIR + "/" + FilesToBackup[i];
         if (!wxFileExists(copyToPath))
         {
             if (!wxCopyFile(copyFromPath, copyToPath))
@@ -706,9 +720,8 @@ bool PatcherGUIFrame::DecompressUPK()
     {
         long retVal = 0;
         wxString executeDecompressCommandLineString = "\"" + DecompressProgram + "\"";
-        executeDecompressCommandLineString += " -lzo -ps3";
-        executeDecompressCommandLineString += " -out=\"" + TextCtrl1->GetValue() + "/XComGame/CookedPCConsole\"";
         executeDecompressCommandLineString += " \"" + FilesToDecompress[i] + "\"";
+        executeDecompressCommandLineString += " \"" + TextCtrl1->GetValue() + COOKED_DIR + "/" + FilesToDecompress[i] + "\"";
 
         wxExecuteEnv env;
         env.cwd = curBackupPathString;
@@ -746,7 +759,7 @@ bool PatcherGUIFrame::RemoveSizeFiles()
 
     for (unsigned i = 0; i < FilesToRemove.GetCount(); ++i)
     {
-        wxString removePath = TextCtrl1->GetValue() + wxString("/XComGame/CookedPCConsole/") + FilesToRemove[i];
+        wxString removePath = TextCtrl1->GetValue() + COOKED_DIR + "/" + FilesToRemove[i];
         if (!wxFileExists(removePath))
         {
             wxMessageBox(_("File doesn't exist ") + removePath, _("Error"), wxICON_ERROR | wxOK, this);
@@ -844,6 +857,7 @@ void PatcherGUIFrame::OnShowLog(wxCommandEvent& event)
 
 void PatcherGUIFrame::OnDisableHashCheck(wxCommandEvent& event)
 {
+    #ifdef __WXMSW__
     wxString exePath = TextCtrl1->GetValue() + "/Binaries/Win32/XComGame.exe";
 
     if (!wxFileExists(exePath))
@@ -905,10 +919,14 @@ void PatcherGUIFrame::OnDisableHashCheck(wxCommandEvent& event)
     StatusBar1->PushStatusText("Hash check successfully disabled");
 
     wxMessageBox(_("Has check disabled successfully!"), _("Success"), wxICON_INFORMATION | wxOK, this);
+    #else
+    wxMessageBox(_("Not required for Linux/Mac"), _("Information"), wxICON_INFORMATION | wxOK, this);
+    #endif
 }
 
 void PatcherGUIFrame::OnEnableINI(wxCommandEvent& event)
 {
+    #ifdef __WXMSW__
     wxString exePath = TextCtrl1->GetValue() + "/Binaries/Win32/XComGame.exe";
 
     if (!wxFileExists(exePath))
@@ -973,13 +991,16 @@ void PatcherGUIFrame::OnEnableINI(wxCommandEvent& event)
     StatusBar1->PushStatusText("INI loading successfully enabled");
 
     wxMessageBox(_("INI loading enabled successfully!"), _("Success"), wxICON_INFORMATION | wxOK, this);
+    #else
+    wxMessageBox(_("Not required for Linux/Mac"), _("Information"), wxICON_INFORMATION | wxOK, this);
+    #endif
 }
 
 void PatcherGUIFrame::OnAbout(wxCommandEvent& event)
 {
     wxString msg;
     msg << "PatcherGUI — a tool to install and maintain modifications for XCOM:EU and EW.\n\n"
-        << "Current version: 6.1\n\n"
+        << "Current version: 6.2\n\n"
         << "Author: wghost81 aka Wasteland Ghost\n\n"
         << "All trademarks, mentioned herein, are properties of their respective owners.";
     wxMessageBox(msg, _("About PatcherGUI"), wxICON_INFORMATION | wxOK, this);
@@ -1007,7 +1028,7 @@ void PatcherGUIFrame::OnShowReadme(wxCommandEvent& event)
 
 void PatcherGUIFrame::OnOpenConfigFolder(wxCommandEvent& event)
 {
-    wxString configPath = TextCtrl1->GetValue() + "/XComGame/Config";
+    wxString configPath = TextCtrl1->GetValue() + "/xcomgame/config";
 
     if (!wxDirExists(configPath))
     {
@@ -1029,6 +1050,7 @@ void PatcherGUIFrame::OnShowDebugLog(wxCommandEvent& event)
 
 void PatcherGUIFrame::DisableSpecificPackageHashCheck(wxCommandEvent& event)
 {
+    #ifdef __WXMSW__
     wxString exePath = TextCtrl1->GetValue() + "/Binaries/Win32/XComGame.exe";
 
     if (!wxFileExists(exePath))
@@ -1101,10 +1123,14 @@ void PatcherGUIFrame::DisableSpecificPackageHashCheck(wxCommandEvent& event)
     StatusBar1->PushStatusText("Hash check successfully disabled");
 
     wxMessageBox(_("Has check disabled successfully!"), _("Success"), wxICON_INFORMATION | wxOK, this);
+    #else
+    wxMessageBox(_("Not required for Linux/Mac"), _("Information"), wxICON_INFORMATION | wxOK, this);
+    #endif
 }
 
 void PatcherGUIFrame::OnDisablePhoneHome(wxCommandEvent& event)
 {
+    #ifdef __WXMSW__
     wxString exePath = TextCtrl1->GetValue() + "/Binaries/Win32/XComGame.exe";
 
     if (!wxFileExists(exePath))
@@ -1149,6 +1175,9 @@ void PatcherGUIFrame::OnDisablePhoneHome(wxCommandEvent& event)
     StatusBar1->PushStatusText("INI downloading successfully disabled");
 
     wxMessageBox(_("INI downloading disabled successfully!"), _("Success"), wxICON_INFORMATION | wxOK, this);
+    #else
+    wxMessageBox(_("Use hosts file to disable phone home manually under Linux/Mac"), _("Information"), wxICON_INFORMATION | wxOK, this);
+    #endif
 }
 
 std::string TextToHex(const wxString& TextBuffer)
@@ -1169,6 +1198,7 @@ std::string TextToHex(const wxString& TextBuffer)
 
 void PatcherGUIFrame::OnPatchExecutable(wxCommandEvent& event)
 {
+    #ifdef __WXMSW__
     wxString exePath = TextCtrl1->GetValue() + "/Binaries/Win32/XComGame.exe";
 
     if (!wxFileExists(exePath))
@@ -1242,4 +1272,7 @@ void PatcherGUIFrame::OnPatchExecutable(wxCommandEvent& event)
     StatusBar1->PushStatusText("Executable patched successfully");
 
     wxMessageBox(_("Executable patched successfully!"), _("Success"), wxICON_INFORMATION | wxOK, this);
+    #else
+    wxMessageBox(_("Not used under Linux/Mac"), _("Information"), wxICON_INFORMATION | wxOK, this);
+    #endif
 }

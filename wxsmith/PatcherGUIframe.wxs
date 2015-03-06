@@ -13,7 +13,7 @@
 							<object class="wxFlexGridSizer" variable="FlexGridSizer2" member="no">
 								<cols>2</cols>
 								<growablecols>0</growablecols>
-								<growablerows>2,3</growablerows>
+								<growablerows>2</growablerows>
 								<object class="sizeritem">
 									<object class="wxTextCtrl" name="ID_TEXTCTRL1" variable="TextCtrl1" member="yes">
 										<value>Path to XCOM:EU or XCOM:EW</value>

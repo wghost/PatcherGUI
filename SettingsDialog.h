@@ -2,12 +2,12 @@
 #define SETTINGSDIALOG_H
 
 //(*Headers(SettingsDialog)
+#include <wx/dialog.h>
 #include <wx/sizer.h>
+#include <wx/button.h>
+#include <wx/panel.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
-#include <wx/panel.h>
-#include <wx/button.h>
-#include <wx/dialog.h>
 //*)
 
 class SettingsDialog: public wxDialog
@@ -17,16 +17,16 @@ class SettingsDialog: public wxDialog
 		virtual ~SettingsDialog();
 
 		//(*Declarations(SettingsDialog)
-		wxStaticText* StaticText2;
-		wxButton* Button1;
+		wxTextCtrl* TextCtrl3;
 		wxPanel* Panel1;
-		wxStaticText* StaticText1;
-		wxStaticText* StaticText3;
+		wxButton* Button1;
 		wxButton* Button2;
 		wxButton* Button3;
-		wxTextCtrl* TextCtrl2;
+		wxStaticText* StaticText1;
+		wxStaticText* StaticText3;
 		wxTextCtrl* TextCtrl1;
-		wxTextCtrl* TextCtrl3;
+		wxStaticText* StaticText2;
+		wxTextCtrl* TextCtrl2;
 		//*)
 
 	protected:

@@ -2,10 +2,10 @@
 #define SHOWDEBUGLOGDIALOG_H
 
 //(*Headers(ShowDebugLogDialog)
-#include <wx/sizer.h>
-#include <wx/textctrl.h>
-#include <wx/panel.h>
 #include <wx/dialog.h>
+#include <wx/sizer.h>
+#include <wx/panel.h>
+#include <wx/textctrl.h>
 //*)
 
 class ShowDebugLogDialog: public wxDialog
