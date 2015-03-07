@@ -26,6 +26,8 @@
 #include <algorithm>
 
 #define COOKED_DIR "/xcomgame/cookedpcconsole"
+#define XCOMGAME_EXE "/Binaries/Win32/XComGame.exe"
+#define XCOMEW_EXE "/Binaries/Win32/XComEW.exe"
 
 //(*InternalHeaders(PatcherGUIFrame)
 #include <wx/bitmap.h>
@@ -289,7 +291,7 @@ void PatcherGUIFrame::OnSaveModFile(wxCommandEvent& event)
         RichTextCtrl1->SaveFile(RichTextCtrl1->GetFilename(), wxRICHTEXT_TYPE_TEXT);
     else
         SaveModFileAs();
-    StatusBar1->PushStatusText("Mod file saved successfully");
+    StatusBar1->PushStatusText(_("Mod file saved successfully"));
 }
 
 void PatcherGUIFrame::SaveModFileAs()
@@ -315,7 +317,7 @@ void PatcherGUIFrame::SaveModFileAs()
 void PatcherGUIFrame::OnSaveModFileAs(wxCommandEvent& event)
 {
     SaveModFileAs();
-    StatusBar1->PushStatusText("Mod file saved successfully");
+    StatusBar1->PushStatusText(_("Mod file saved successfully"));
 }
 
 void PatcherGUIFrame::OnSelectDirectory(wxCommandEvent& event)
@@ -346,7 +348,7 @@ void PatcherGUIFrame::OnSelectDirectory(wxCommandEvent& event)
     bSelectPath = true;
     LoadLogs();
 
-    StatusBar1->PushStatusText("Game directory changed successfully");
+    StatusBar1->PushStatusText(_("Game directory changed successfully"));
 }
 
 void PatcherGUIFrame::LoadLogs()
@@ -415,7 +417,7 @@ void PatcherGUIFrame::OnSelectModFile(wxCommandEvent& event)
         return;
 
     OpenModFile(openFileDialog.GetPath());
-    StatusBar1->PushStatusText("Mod file loaded successfully");
+    StatusBar1->PushStatusText(_("Mod file loaded successfully"));
 }
 
 void PatcherGUIFrame::OpenModFile(wxString FilePath)
@@ -547,7 +549,7 @@ bool PatcherGUIFrame::InstallMod(wxString& filename, wxString& str)
     if (!RemoveSizeFiles())
         return false;
 
-    StatusBar1->PushStatusText("Applying mod file, please wait...");
+    StatusBar1->PushStatusText(_("Applying mod file, please wait..."));
 
     long retVal = 0;
     wxString executePatchUPKcommandLineString = "\"" + PatchUPKprogram.c_str() + "\"";
@@ -578,7 +580,7 @@ bool PatcherGUIFrame::InstallMod(wxString& filename, wxString& str)
 
     ProgLog << "\nMod applied successfully\n\n";
 
-    StatusBar1->PushStatusText("Mod applied successfully");
+    StatusBar1->PushStatusText(_("Mod applied successfully"));
 
     if (filename.Find(".uninstall") != wxNOT_FOUND)
     {
@@ -659,7 +661,7 @@ bool PatcherGUIFrame::RestoreFromBackup()
 
     ProgLog << "Restoring from backup completed successfully\n\n";
 
-    StatusBar1->PushStatusText("Restoring from backup completed successfully");
+    StatusBar1->PushStatusText(_("Restoring from backup completed successfully"));
 
     return true;
 }
@@ -860,38 +862,133 @@ void PatcherGUIFrame::OnShowLog(wxCommandEvent& event)
     }
 }
 
-void PatcherGUIFrame::OnDisableHashCheck(wxCommandEvent& event)
+void PatcherGUIFrame::OnAbout(wxCommandEvent& event)
 {
-    #ifdef __WXMSW__
-    wxString exePath = TextCtrl1->GetValue() + "/Binaries/Win32/XComGame.exe";
+    wxString msg;
+    msg << _("PatcherGUI — a tool to install and maintain modifications for XCOM:EU and EW.") << "\n\n"
+        << "Current version: 6.3\n\n"
+        << "Author: wghost81 aka Wasteland Ghost\n\n"
+        << "All trademarks, mentioned herein, are properties of their respective owners.";
+    wxMessageBox(msg, _("About PatcherGUI"), wxICON_INFORMATION | wxOK, this);
+}
 
-    if (!wxFileExists(exePath))
+void PatcherGUIFrame::OnShowReadme(wxCommandEvent& event)
+{
+    wxString pathToReadmeFile = wxGetCwd() + "/PatcherGUIReadme.txt";
+
+    if (!wxFileExists(pathToReadmeFile))
     {
-        if (wxFileExists(TextCtrl1->GetValue() + "/Binaries/Win32/XComEW.exe"))
-        {
-            wxMessageBox(_("XCOM:EW already has hash check removed by developers!"), _("Information"), wxICON_INFORMATION | wxOK, this);
-            return;
-        }
-        wxMessageBox(_("Failed to find game executable!"), _("Error"), wxICON_ERROR | wxOK, this);
+        wxMessageBox(_("Failed to find PatcherGUIReadme.txt!"), _("Error"), wxICON_ERROR | wxOK, this);
         return;
     }
 
+    wxFileType *ft = wxTheMimeTypesManager->GetFileTypeFromExtension("txt");
+    wxString cmd;
+    if (ft)
+    {
+        ft->GetOpenCommand(&cmd, wxFileType::MessageParameters(pathToReadmeFile));
+        wxExecute(cmd, wxEXEC_ASYNC);
+        delete ft;
+    }
+}
+
+void PatcherGUIFrame::OnShowDebugLog(wxCommandEvent& event)
+{
+    ShowDebugLogDialog dlg(this);
+
+    dlg.TextCtrl1->SetValue(ProgLog);
+
+    dlg.ShowModal();
+}
+
+void PatcherGUIFrame::OnOpenConfigFolder(wxCommandEvent& event)
+{
+    wxString configPath = TextCtrl1->GetValue() + "/xcomgame/config";
+
+    if (!wxDirExists(configPath))
+    {
+        wxMessageBox(_("Failed to find config folder!"), _("Error"), wxICON_ERROR | wxOK, this);
+        return;
+    }
+
+    wxLaunchDefaultBrowser(wxString("file:") + configPath, wxBROWSER_NEW_WINDOW);
+}
+
+bool PatcherGUIFrame::FindGameEXE(wxString& exePath)
+{
+    exePath = TextCtrl1->GetValue() + XCOMGAME_EXE;
+    if (!wxFileExists(exePath))
+    {
+        exePath = TextCtrl1->GetValue() + XCOMEW_EXE;
+        if (!wxFileExists(exePath))
+        {
+            wxMessageBox(_("Failed to find game executable!"), _("Error"), wxICON_ERROR | wxOK, this);
+            return false;
+        }
+    }
+    return MakeEXEBackup(exePath);
+}
+
+bool PatcherGUIFrame::HashCheckValid(wxString& exePath)
+{
+    exePath = TextCtrl1->GetValue() + XCOMGAME_EXE;
+    if (!wxFileExists(exePath))
+    {
+        if (wxFileExists(TextCtrl1->GetValue() + XCOMEW_EXE))
+        {
+            wxMessageBox(_("XCOM:EW already has hash check removed by developers!"), _("Information"), wxICON_INFORMATION | wxOK, this);
+            return false;
+        }
+        wxMessageBox(_("Failed to find game executable!"), _("Error"), wxICON_ERROR | wxOK, this);
+        return false;
+    }
+    return MakeEXEBackup(exePath);
+}
+
+bool PatcherGUIFrame::MakeEXEBackup(wxString exePath)
+{
     if (!wxFileExists(exePath + ".bak"))
     {
         if (!wxCopyFile(exePath, exePath + ".bak"))
         {
             wxMessageBox(_("Failed to make backup!"), _("Error"), wxICON_ERROR | wxOK, this);
-            return;
+            return false;
         }
     }
+    return true;
+}
 
-    std::ifstream exeFile(exePath.c_str(), std::ios::binary);
+void ReadFileToMem(std::stringstream& ss, std::string file_name)
+{
+    std::ifstream file(file_name, std::ios::binary);
+    if (!file)
+        return;
+    ss << file.rdbuf();
+    file.close();
+}
+
+void SaveFileToDisk(std::stringstream& str, std::string file_name)
+{
+    std::ofstream file(file_name, std::ios::binary);
+    file << str.str();
+    file.close();
+}
+
+void PatcherGUIFrame::OnDisableHashCheck(wxCommandEvent& event)
+{
+    #if defined __WXMSW__
+    wxString exePath;
+
+    if (!HashCheckValid(exePath))
+    {
+        return;
+    }
+
     std::stringstream ss;
-    ss << exeFile.rdbuf();
+    ReadFileToMem(ss, std::string(exePath));
 
-    size_t pos = std::string::npos;
     int num = 0;
-
+    size_t pos = std::string::npos;
     pos = ss.str().find("core.upk");
     if (pos != std::string::npos)
     {
@@ -921,19 +1018,16 @@ void PatcherGUIFrame::OnDisableHashCheck(wxCommandEvent& event)
         ++num;
     }
 
-    exeFile.close();
-
-    std::ofstream exeFleOut(exePath.c_str(), std::ios::binary);
-    exeFleOut << ss.str();
+    SaveFileToDisk(ss, std::string(exePath));
 
     if (num == 0)
     {
-        StatusBar1->PushStatusText("Hash check is already disabled");
+        StatusBar1->PushStatusText(_("Hash check is already disabled"));
         wxMessageBox(_("Hash check is already disabled"), _("Information"), wxICON_INFORMATION | wxOK, this);
     }
     else
     {
-        StatusBar1->PushStatusText("Hash check disabled successfully");
+        StatusBar1->PushStatusText(_("Hash check disabled successfully"));
         wxMessageBox(_("Has check disabled successfully!"), _("Success"), wxICON_INFORMATION | wxOK, this);
     }
     #else
@@ -941,41 +1035,82 @@ void PatcherGUIFrame::OnDisableHashCheck(wxCommandEvent& event)
     #endif
 }
 
-void PatcherGUIFrame::OnEnableINI(wxCommandEvent& event)
+void PatcherGUIFrame::DisableSpecificPackageHashCheck(wxCommandEvent& event)
 {
-    #ifdef __WXMSW__
-    wxString exePath = TextCtrl1->GetValue() + "/Binaries/Win32/XComGame.exe";
+    #if defined __WXMSW__
+    wxString exePath;
 
-    if (!wxFileExists(exePath))
-        exePath = TextCtrl1->GetValue() + "/Binaries/Win32/XComEW.exe";
-
-    if (!wxFileExists(exePath))
+    if (!HashCheckValid(exePath))
     {
-        wxMessageBox(_("Failed to find game executable!"), _("Error"), wxICON_ERROR | wxOK, this);
         return;
     }
 
-    if (!wxFileExists(exePath + ".bak"))
+    wxTextEntryDialog dlg(this, _("Input package name"), _("Disable hash check"));
+
+    if (dlg.ShowModal() != wxID_OK)
     {
-        if (!wxCopyFile(exePath, exePath + ".bak"))
-        {
-            wxMessageBox(_("Failed to make backup!"), _("Error"), wxICON_ERROR | wxOK, this);
-            return;
-        }
+        return;
     }
 
-    std::ifstream exeFile(exePath.c_str(), std::ios::binary);
+    wxString nameToFind = dlg.GetValue().Lower();
+
+    if (nameToFind.Find(".upk") == wxNOT_FOUND)
+    {
+        wxMessageBox(nameToFind + _(" is not a package!"), _("Error"), wxICON_ERROR | wxOK, this);
+        return;
+    }
+
     std::stringstream ss;
-    ss << exeFile.rdbuf();
+    ReadFileToMem(ss, std::string(exePath));
 
     size_t pos = std::string::npos;
+    pos = ss.str().find(nameToFind);
+    if (pos != std::string::npos)
+    {
+        ss.seekp(pos);
+        ss.put('y');
+    }
+    else
+    {
+        nameToFind[0] = 'y';
+        pos = ss.str().find(nameToFind);
+        if (pos != std::string::npos)
+        {
+            wxMessageBox(_("Hash check for this package is already disabled"), _("Information"), wxICON_INFORMATION | wxOK, this);
+        }
+        else
+        {
+            wxMessageBox(_("Failed to find specified package reference!"), _("Error"), wxICON_ERROR | wxOK, this);
+        }
+        return;
+    }
+
+    SaveFileToDisk(ss, std::string(exePath));
+
+    StatusBar1->PushStatusText(_("Hash check disabled successfully"));
+    wxMessageBox(_("Has check disabled successfully!"), _("Success"), wxICON_INFORMATION | wxOK, this);
+    #else
+    wxMessageBox(_("Not required for Linux/Mac"), _("Information"), wxICON_INFORMATION | wxOK, this);
+    #endif
+}
+
+void PatcherGUIFrame::OnEnableINI(wxCommandEvent& event)
+{
+    #if defined __WXMSW__
+    wxString exePath;
+
+    if (!FindGameEXE(exePath))
+        return;
+
+    std::stringstream ss;
+    ReadFileToMem(ss, std::string(exePath));
     int num = 0;
 
     char chdgc[] = {0x58 , 0x00 , 0x43 , 0x00 , 0x6F , 0x00 , 0x6D , 0x00 , 0x47 , 0x00 , 0x61 , 0x00 , 0x6D , 0x00 , 0x65 , 0x00 , 0x5C , 0x00 , 0x43 , 0x00 , 0x6F , 0x00 , 0x6E , 0x00 , 0x66 , 0x00 , 0x69 , 0x00 , 0x67 , 0x00 , 0x5C , 0x00 , 0x44 , 0x00 , 0x65 , 0x00 , 0x66 , 0x00 , 0x61 , 0x00 , 0x75 , 0x00 , 0x6C , 0x00 , 0x74 , 0x00 , 0x47 , 0x00 , 0x61 , 0x00 , 0x6D , 0x00 , 0x65 , 0x00 , 0x43 , 0x00 , 0x6F , 0x00 , 0x72 , 0x00 , 0x65 , 0x00 , 0x2E , 0x00 , 0x69 , 0x00 , 0x6E , 0x00 , 0x69 , 0x00};
     char chdl[]  = {0x58 , 0x00 , 0x43 , 0x00 , 0x6F , 0x00 , 0x6D , 0x00 , 0x47 , 0x00 , 0x61 , 0x00 , 0x6D , 0x00 , 0x65 , 0x00 , 0x5C , 0x00 , 0x43 , 0x00 , 0x6F , 0x00 , 0x6E , 0x00 , 0x66 , 0x00 , 0x69 , 0x00 , 0x67 , 0x00 , 0x5C , 0x00 , 0x44 , 0x00 , 0x65 , 0x00 , 0x66 , 0x00 , 0x61 , 0x00 , 0x75 , 0x00 , 0x6C , 0x00 , 0x74 , 0x00 , 0x4C , 0x00 , 0x6F , 0x00 , 0x61 , 0x00 , 0x64 , 0x00 , 0x6F , 0x00 , 0x75 , 0x00 , 0x74 , 0x00 , 0x73 , 0x00 , 0x2E , 0x00 , 0x69 , 0x00 , 0x6E , 0x00 , 0x69 , 0x00};
-
     std::string dgc(chdgc, 70), dl(chdl, 70);
 
+    size_t pos = std::string::npos;
     pos = ss.str().find(dgc);
     if (pos != std::string::npos)
     {
@@ -1005,19 +1140,16 @@ void PatcherGUIFrame::OnEnableINI(wxCommandEvent& event)
         ++num;
     }
 
-    exeFile.close();
-
-    std::ofstream exeFleOut(exePath.c_str(), std::ios::binary);
-    exeFleOut << ss.str();
+    SaveFileToDisk(ss, std::string(exePath));
 
     if (num == 0)
     {
-        StatusBar1->PushStatusText("INI loading is already enabled");
+        StatusBar1->PushStatusText(_("INI loading is already enabled"));
         wxMessageBox(_("INI loading is already enabled"), _("Information"), wxICON_INFORMATION | wxOK, this);
     }
     else
     {
-        StatusBar1->PushStatusText("INI loading enabled successfully");
+        StatusBar1->PushStatusText(_("INI loading enabled successfully"));
         wxMessageBox(_("INI loading enabled successfully!"), _("Success"), wxICON_INFORMATION | wxOK, this);
     }
     #else
@@ -1025,171 +1157,22 @@ void PatcherGUIFrame::OnEnableINI(wxCommandEvent& event)
     #endif
 }
 
-void PatcherGUIFrame::OnAbout(wxCommandEvent& event)
-{
-    wxString msg;
-    msg << "PatcherGUI — a tool to install and maintain modifications for XCOM:EU and EW.\n\n"
-        << "Current version: 6.3\n\n"
-        << "Author: wghost81 aka Wasteland Ghost\n\n"
-        << "All trademarks, mentioned herein, are properties of their respective owners.";
-    wxMessageBox(msg, _("About PatcherGUI"), wxICON_INFORMATION | wxOK, this);
-}
-
-void PatcherGUIFrame::OnShowReadme(wxCommandEvent& event)
-{
-    wxString pathToReadmeFile = wxGetCwd() + "/PatcherGUIReadme.txt";
-
-    if (!wxFileExists(pathToReadmeFile))
-    {
-        wxMessageBox(_("Failed to find PatcherGUIReadme.txt!"), _("Error"), wxICON_ERROR | wxOK, this);
-        return;
-    }
-
-    wxFileType *ft = wxTheMimeTypesManager->GetFileTypeFromExtension("txt");
-    wxString cmd;
-    if (ft)
-    {
-        ft->GetOpenCommand(&cmd, wxFileType::MessageParameters(pathToReadmeFile));
-        wxExecute(cmd, wxEXEC_ASYNC);
-        delete ft;
-    }
-}
-
-void PatcherGUIFrame::OnOpenConfigFolder(wxCommandEvent& event)
-{
-    wxString configPath = TextCtrl1->GetValue() + "/xcomgame/config";
-
-    if (!wxDirExists(configPath))
-    {
-        wxMessageBox(_("Failed to find config folder!"), _("Error"), wxICON_ERROR | wxOK, this);
-        return;
-    }
-
-    wxLaunchDefaultBrowser(wxString("file:") + configPath, wxBROWSER_NEW_WINDOW);
-}
-
-void PatcherGUIFrame::OnShowDebugLog(wxCommandEvent& event)
-{
-    ShowDebugLogDialog dlg(this);
-
-    dlg.TextCtrl1->SetValue(ProgLog);
-
-    dlg.ShowModal();
-}
-
-void PatcherGUIFrame::DisableSpecificPackageHashCheck(wxCommandEvent& event)
-{
-    #ifdef __WXMSW__
-    wxString exePath = TextCtrl1->GetValue() + "/Binaries/Win32/XComGame.exe";
-
-    if (!wxFileExists(exePath))
-    {
-        if (wxFileExists(TextCtrl1->GetValue() + "/Binaries/Win32/XComEW.exe"))
-        {
-            wxMessageBox(_("XCOM:EW already has hash check removed by developers!"), _("Information"), wxICON_INFORMATION | wxOK, this);
-            return;
-        }
-        wxMessageBox(_("Failed to find game executable!"), _("Error"), wxICON_ERROR | wxOK, this);
-        return;
-    }
-
-    if (!wxFileExists(exePath + ".bak"))
-    {
-        if (!wxCopyFile(exePath, exePath + ".bak"))
-        {
-            wxMessageBox(_("Failed to make backup!"), _("Error"), wxICON_ERROR | wxOK, this);
-            return;
-        }
-    }
-
-    wxTextEntryDialog dlg(this, "Input package name", "Disable hash check");
-
-    if (dlg.ShowModal() != wxID_OK)
-    {
-        return;
-    }
-
-    wxString nameToFind = dlg.GetValue().Lower();
-
-    if (nameToFind.Find(".upk") == wxNOT_FOUND)
-    {
-        wxMessageBox(nameToFind + " is not a package!", _("Error"), wxICON_ERROR | wxOK, this);
-        return;
-    }
-
-    std::ifstream exeFile(exePath.c_str(), std::ios::binary);
-    std::stringstream ss;
-    ss << exeFile.rdbuf();
-
-    size_t pos = std::string::npos;
-
-    pos = ss.str().find(nameToFind);
-    if (pos != std::string::npos)
-    {
-        ss.seekp(pos);
-        ss.put('y');
-    }
-    else
-    {
-        nameToFind[0] = 'y';
-        pos = ss.str().find(nameToFind);
-        if (pos != std::string::npos)
-        {
-            wxMessageBox(_("Hash check for this package is already disabled"), _("Information"), wxICON_INFORMATION | wxOK, this);
-        }
-        else
-        {
-            wxMessageBox(_("Failed to find specified package reference!"), _("Error"), wxICON_ERROR | wxOK, this);
-        }
-        return;
-    }
-
-    exeFile.close();
-
-    std::ofstream exeFleOut(exePath.c_str(), std::ios::binary);
-    exeFleOut << ss.str();
-
-    StatusBar1->PushStatusText("Hash check disabled successfully");
-    wxMessageBox(_("Has check disabled successfully!"), _("Success"), wxICON_INFORMATION | wxOK, this);
-    #else
-    wxMessageBox(_("Not required for Linux/Mac"), _("Information"), wxICON_INFORMATION | wxOK, this);
-    #endif
-}
-
 void PatcherGUIFrame::OnDisablePhoneHome(wxCommandEvent& event)
 {
-    #ifdef __WXMSW__
-    wxString exePath = TextCtrl1->GetValue() + "/Binaries/Win32/XComGame.exe";
+    #if defined __WXMSW__
+    wxString exePath;
 
-    if (!wxFileExists(exePath))
-        exePath = TextCtrl1->GetValue() + "/Binaries/Win32/XComEW.exe";
-
-    if (!wxFileExists(exePath))
-    {
-        wxMessageBox(_("Failed to find game executable!"), _("Error"), wxICON_ERROR | wxOK, this);
+    if (!FindGameEXE(exePath))
         return;
-    }
 
-    if (!wxFileExists(exePath + ".bak"))
-    {
-        if (!wxCopyFile(exePath, exePath + ".bak"))
-        {
-            wxMessageBox(_("Failed to make backup!"), _("Error"), wxICON_ERROR | wxOK, this);
-            return;
-        }
-    }
-
-    std::ifstream exeFile(exePath.c_str(), std::ios::binary);
     std::stringstream ss;
-    ss << exeFile.rdbuf();
-
-    size_t pos = std::string::npos;
+    ReadFileToMem(ss, std::string(exePath));
     int num = 0;
 
     char chAddr[] = {0x66, 0x00, 0x69, 0x00, 0x72, 0x00, 0x61, 0x00, 0x78, 0x00, 0x69, 0x00, 0x73, 0x00, 0x2E, 0x00, 0x63, 0x00, 0x6F, 0x00, 0x6D, 0x00};
-
     std::string addr(chAddr, 22);
 
+    size_t pos = std::string::npos;
     pos = ss.str().find(addr);
     if (pos != std::string::npos)
     {
@@ -1197,14 +1180,12 @@ void PatcherGUIFrame::OnDisablePhoneHome(wxCommandEvent& event)
         ss.put('y');
         ++num;
     }
-    exeFile.close();
 
-    std::ofstream exeFleOut(exePath.c_str(), std::ios::binary);
-    exeFleOut << ss.str();
+    SaveFileToDisk(ss, std::string(exePath));
 
     if (num == 0)
     {
-        StatusBar1->PushStatusText("INI downloading is already disabled");
+        StatusBar1->PushStatusText(_("INI downloading is already disabled"));
         wxMessageBox(_("INI downloading is already disabled!"), _("Information"), wxICON_INFORMATION | wxOK, this);
     }
     else
@@ -1235,46 +1216,26 @@ std::string TextToHex(const wxString& TextBuffer)
 
 void PatcherGUIFrame::OnPatchExecutable(wxCommandEvent& event)
 {
-    #ifdef __WXMSW__
-    wxString exePath = TextCtrl1->GetValue() + "/Binaries/Win32/XComGame.exe";
+    #if defined __WXMSW__
+    wxString exePath;
+    if (!FindGameEXE(exePath))
+        return;
 
-    if (!wxFileExists(exePath))
-    {
-        exePath = TextCtrl1->GetValue() + "/Binaries/Win32/XComEW.exe";
-        if (!wxFileExists(exePath))
-        {
-            wxMessageBox(_("Failed to find game executable!"), _("Error"), wxICON_ERROR | wxOK, this);
-            return;
-        }
-    }
-
-    if (!wxFileExists(exePath + ".bak"))
-    {
-        if (!wxCopyFile(exePath, exePath + ".bak"))
-        {
-            wxMessageBox(_("Failed to make backup!"), _("Error"), wxICON_ERROR | wxOK, this);
-            return;
-        }
-    }
-
-    wxTextEntryDialog dlg(this, "Input before hex", "Patch executable");
-
+    wxTextEntryDialog dlg(this, _("Input before hex"), _("Patch executable"));
     if (dlg.ShowModal() != wxID_OK)
     {
         return;
     }
 
     std::string hexToFind = TextToHex(dlg.GetValue());
-
     if (hexToFind.size() < 1)
     {
         wxMessageBox(_("Bad before hex!"), _("Error"), wxICON_ERROR | wxOK, this);
         return;
     }
 
-    std::ifstream exeFile(exePath.c_str(), std::ios::binary);
     std::stringstream ss;
-    ss << exeFile.rdbuf();
+    ReadFileToMem(ss, std::string(exePath));
 
     size_t pos = std::string::npos;
     pos = ss.str().find(hexToFind);
@@ -1284,15 +1245,13 @@ void PatcherGUIFrame::OnPatchExecutable(wxCommandEvent& event)
         return;
     }
 
-    wxTextEntryDialog dlg2(this, "Input after hex", "Patch executable");
-
+    wxTextEntryDialog dlg2(this, _("Input after hex"), _("Patch executable"));
     if (dlg2.ShowModal() != wxID_OK)
     {
         return;
     }
 
     std::string hexToWrite = TextToHex(dlg2.GetValue());
-
     if (hexToWrite.size() != hexToFind.size())
     {
         wxMessageBox(_("After hex should have the same size as before hex!"), _("Error"), wxICON_ERROR | wxOK, this);
@@ -1301,13 +1260,9 @@ void PatcherGUIFrame::OnPatchExecutable(wxCommandEvent& event)
 
     ss.seekp(pos);
     ss.write(hexToWrite.data(), hexToWrite.size());
+    SaveFileToDisk(ss, std::string(exePath));
 
-    exeFile.close();
-    std::ofstream exeFleOut(exePath.c_str(), std::ios::binary);
-    exeFleOut << ss.str();
-
-    StatusBar1->PushStatusText("Executable patched successfully");
-
+    StatusBar1->PushStatusText(_("Executable patched successfully"));
     wxMessageBox(_("Executable patched successfully!"), _("Success"), wxICON_INFORMATION | wxOK, this);
     #else
     wxMessageBox(_("Not used under Linux/Mac"), _("Information"), wxICON_INFORMATION | wxOK, this);

@@ -56,6 +56,9 @@ class PatcherGUIFrame: public wxFrame
         bool SaveCFG();
 
         bool NeedDecompression(wxString filename);
+        bool FindGameEXE(wxString& exePath);
+        bool HashCheckValid(wxString& exePath);
+        bool MakeEXEBackup(wxString exePath);
 
         void OpenModFile(wxString FilePath);
         void SaveModFileAs();
