@@ -12,13 +12,13 @@
 
 //(*Headers(PatcherGUIFrame)
 #include <wx/sizer.h>
-#include <wx/button.h>
 #include <wx/menu.h>
-#include <wx/panel.h>
-#include <wx/statusbr.h>
-#include <wx/richtext/richtextctrl.h>
-#include <wx/frame.h>
 #include <wx/textctrl.h>
+#include <wx/panel.h>
+#include <wx/richtext/richtextctrl.h>
+#include <wx/button.h>
+#include <wx/frame.h>
+#include <wx/statusbr.h>
 //*)
 #include <wx/arrstr.h>
 
@@ -116,36 +116,36 @@ class PatcherGUIFrame: public wxFrame
         //*)
 
         //(*Declarations(PatcherGUIFrame)
-        wxMenuItem* MenuItem2;
-        wxMenuItem* MenuItem1;
-        wxPanel* Panel1;
-        wxMenu* Menu5;
-        wxMenuItem* Menu1;
-        wxStatusBar* StatusBar1;
-        wxButton* Button4;
-        wxButton* Button1;
-        wxMenu* Menu6;
-        wxButton* Button2;
-        wxButton* Button8;
-        wxMenuItem* MenuItem3;
-        wxRichTextCtrl* RichTextCtrl1;
         wxMenuItem* Menu3;
-        wxMenuItem* MenuItem9;
-        wxMenu* Menu7;
-        wxMenu* Menu4;
-        wxMenuItem* MenuItem11;
-        wxButton* Button9;
+        wxMenuItem* MenuItem8;
+        wxMenuItem* MenuItem7;
+        wxButton* Button4;
         wxMenuItem* MenuItem5;
+        wxMenuItem* Menu2;
+        wxMenuItem* MenuItem2;
+        wxRichTextCtrl* RichTextCtrl1;
+        wxButton* Button1;
+        wxMenuItem* MenuItem1;
+        wxMenuItem* MenuItem4;
+        wxMenuItem* MenuItem11;
+        wxPanel* Panel1;
+        wxMenuItem* MenuItem10;
+        wxButton* Button2;
+        wxMenuItem* MenuItem3;
+        wxButton* Button7;
+        wxMenu* Menu7;
+        wxStatusBar* StatusBar1;
+        wxMenuItem* MenuItem6;
+        wxButton* Button9;
+        wxTextCtrl* TextCtrl2;
         wxTextCtrl* TextCtrl1;
         wxMenuBar* MenuBar1;
-        wxMenuItem* MenuItem10;
-        wxMenuItem* MenuItem4;
-        wxMenuItem* MenuItem7;
-        wxMenuItem* MenuItem6;
-        wxMenuItem* Menu2;
-        wxButton* Button7;
-        wxTextCtrl* TextCtrl2;
-        wxMenuItem* MenuItem8;
+        wxMenu* Menu6;
+        wxMenuItem* MenuItem9;
+        wxMenuItem* Menu1;
+        wxButton* Button8;
+        wxMenu* Menu5;
+        wxMenu* Menu4;
         //*)
 
         DECLARE_EVENT_TABLE()

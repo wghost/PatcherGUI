@@ -101,7 +101,7 @@ void SettingsDialog::OnSetBackupPath(wxCommandEvent& event)
 
 void SettingsDialog::OnSetPatchUPKprogram(wxCommandEvent& event)
 {
-    wxFileDialog openFileDialog(this, _("Select PatchUPK.exe location"), "", "", "PatchUPK.exe|*.exe", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+    wxFileDialog openFileDialog(this, _("Select PatchUPK location"), "", "", "", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
     if (openFileDialog.ShowModal() == wxID_CANCEL)
         return;
@@ -111,7 +111,7 @@ void SettingsDialog::OnSetPatchUPKprogram(wxCommandEvent& event)
 
 void SettingsDialog::OnSetDecompressProgramm(wxCommandEvent& event)
 {
-    wxFileDialog openFileDialog(this, _("Select Decompress.exe location"), "", "", "Decompress.exe|*.exe", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+    wxFileDialog openFileDialog(this, _("Select DecompressLZO location"), "", "", "", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
     if (openFileDialog.ShowModal() == wxID_CANCEL)
         return;

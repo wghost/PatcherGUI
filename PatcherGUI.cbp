@@ -46,9 +46,6 @@
 		<Unit filename="ShowDebugLogDialog.h" />
 		<Unit filename="ViewLog.cpp" />
 		<Unit filename="ViewLog.h" />
-		<Unit filename="resource.rc">
-			<Option compilerVar="WINDRES" />
-		</Unit>
 		<Unit filename="wxsmith/PatcherGUIframe.wxs" />
 		<Unit filename="wxsmith/SettingsDialog.wxs" />
 		<Unit filename="wxsmith/ShowDebugLogDialog.wxs" />
