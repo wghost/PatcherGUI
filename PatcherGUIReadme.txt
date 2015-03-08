@@ -1,8 +1,7 @@
 PatcherGUI - a tool to install and maintain modifications for XCOM:EU and EW
 ============================================================================
 
-The information below is intended for mod-users mostly. If you're a mod developer, please, consult
-"PatchUPK_Readme.txt" file, included in the program archive. It contains all the information needed to create mod files for use with PatchUPK/PatcherGUI.
+The information below is intended for mod-users mostly. If you're a mod developer, please, consult "PatchUPK_Readme.txt" file, included in the program archive. It contains all the information needed to create mod files for use with PatchUPK/PatcherGUI.
 
 
 Program features:
@@ -14,11 +13,12 @@ Program features:
 - Writes backup files for every change it makes.
 - Automatically reverts to latest backup if something goes wrong with install/uninstall process.
 - Automatically creates uninstall files.
-- Automatically unpacks game packages using Gildor's decompress program.
-- Has an option to disable hash checks for XCOM:EU.
-- Has an option to enable direct ini loading.
-- Has an option to disable phoning home (ini re-downloading).
+- Automatically unpacks game packages.
+- Has an option to disable hash checks for XCOM:EU (Windows only).
+- Has an option to enable direct ini loading (Windows only).
+- Has an option to disable phoning home (ini re-downloading) (Windows only).
 - Batch installing and uninstalling mods.
+- Cross-platform: works with Windows, Linux and Mac XCOM versions.
 
 
 Quick overview:
@@ -35,17 +35,37 @@ Trying to solve the problem of cooked packages, the XCOM modding community event
 
 This approach is a bit less user-friendly than a final GUI tool with sliders and check-boxes, but modularity and flexibility allows for easier mods creation, distribution and maintaining: anyone can contribute and the next patch will not ruin the majority of the hard work of prior mods!
 
+Linux and Mac differences:
+==========================
+Both Linux and Mac releases do not perform upk hash check, so disabling it is not required.
+
+You can disable phoning home (automatic ini re-downloading) by editing hosts file. For Linux it is usually located at /etc/hosts. Open it (administrator access is required) and add two following lines inside:
+127.0.0.1       prod.xcom.firaxis.com
+127.0.0.1       prod.xcom-ew.firaxis.com
+
+Both Linux and Mac versions prioritize XCom*.ini files over default*.ini files. Thus, if some mod instructs you to edit defaultgamecore.ini, for example, you need to locate and edit XComGameCore.ini file instead.
+
+Under Linux XCom*.ini files for EU are stored in
+~/.local/share/feral-interactive/XCOM/WritableFiles/XComGameCore.ini
+And for EW they are stored in
+~/.local/share/feral-interactive/XCOM/XEW/WritableFiles/XComGameCore.ini
+
+Under Mac search for XCom*.ini files under
+~/Library/Application Support/Feral Interactive/XCOM Enemy Unknown/MacInit
+and
+~/Library/Application Support/Feral Interactive/XCOM Enemy Unknown/XEW/MacInit
+
 
 Preparing your game for handling mods:
 ======================================
-First mandatory thing you should do: make sure your XCOM game is installed outside the "C:\Program Files" (or "C:\Program Files (x86)" on 64-bit Systems) folder. The reason for this is that Windows (since Vista) considers the "Program Files" folder trees to be restricted areas and will revert all the changes any mod makes to a saved "shadow" copy. It's explained better in the "Installing Games on Windows Vista+" wiki article:
+First mandatory thing you should do (Windows only): make sure your XCOM game is installed outside the "C:\Program Files" (or "C:\Program Files (x86)" on 64-bit Systems) folder. The reason for this is that Windows (since Vista) considers the "Program Files" folder trees to be restricted areas and will revert all the changes any mod makes to a saved "shadow" copy. It's explained better in the "Installing Games on Windows Vista+" wiki article:
 http://wiki.tesnexus.com/index.php/Installing_Games_on_Windows_Vista%2B
 
 Second thing you should do is to switch off automatic updates for XCOM in Steam. Right-click XCOM in the Steam applications list and search it's properties for "updates" options. Note, that turning auto-updates off will not prevent Steam from downloading a newly released patch, but it will prevent silent updates running in the background and breaking your game.
 
-Third thing to do is to stop the game from "phoning home". Each time you launch XCOM it "calls" to Firaxis' servers and downloads some "ini" files to prevent multiplayer cheating. If you're planning to make modifications to game "ini" files (like the "Arc Thrower in Pistol Slot" tweak), you need to block those server's IP addresses in the Windows hosts file. Instructions on how to do this can be found here:
+Third thing to do is to stop the game from "phoning home". Each time you launch XCOM it "calls" to Firaxis' servers and downloads some "ini" files to prevent multiplayer cheating. If you're planning to make modifications to game "ini" files (like the "Arc Thrower in Pistol Slot" tweak), you need to block those server's IP addresses in your system's hosts file. Instructions on how to do this can be found here:
 http://wiki.tesnexus.com/index.php/Steam_and_mods#Modifying_hosts_file
-Note that you will most probably need administrator access to do this. Also note that some anti-virus programs automatically protect the hosts file, so you'll probably need to temporarily turn off your anti-virus software.
+Note that you will most probably need administrator access to do this. Also note that some anti-virus programs under Windows automatically protect the hosts file, so you'll probably need to temporarily turn off your anti-virus software.
 
 For more information on how to install mods for XCOM, please, consult these wiki articles:
 http://wiki.tesnexus.com/index.php/Basic_Guide_to_installing_mods
@@ -54,21 +74,21 @@ http://wiki.tesnexus.com/index.php/Steam_and_mods
 
 Making a first step:
 ====================
-Download the latest PatcherGUI archive and unpack it to any folder without locale-specific (i.e. "unicode") symbols in the path. "C:\" or "C:\XCOM-Mods-and-Utils" will do nicely.
+Download the latest PatcherGUI archive and unpack it to any folder without locale-specific (i.e. "unicode") symbols in the path. "C:\" or "C:\XCOM-Mods-and-Utils" will do nicely under Windows. Under Linux and Mac put it under your home directory.
 
-Open the folder where you unpacked PatcherGUI and run "PatcherGUI.exe". You can create a desktop link to "PatcherGUI.exe" by the usual Windows' means if you want.
+Open the folder where you unpacked PatcherGUI and run "PatcherGUI" executable ("PatcherGUI.exe" under Windows). You can create a desktop link to the executable by the usual OS means if you want.
 
 The very first line of the tool, which has a "Path to XCOM:EU or XCOM:EW" tool-tip (which appears when you hover your mouse over it for a few seconds), should point to your actual XCOM install folder. Press the corresponding "Browse" button (one with a "Set path to XCOM:EU or XCOM:EW" tool-tip) and select the "Path-to-SteamLibrary\SteamApps\common\XCom-Enemy-Unknown" folder if you're planning to install EU mods; and the "Path-to-SteamLibrary\SteamApps\common\XCom-Enemy-Unknown\XEW" folder if you're planning to install mods for EW.
 
-("Path-to-SteamLibrary" is a placeholder for the actual path to your SteamLibrary folder location, for example, "D:\SteamLibrary".)
+("Path-to-SteamLibrary" is a placeholder for the actual path to your SteamLibrary folder location, for example, "D:\SteamLibrary" under Windows.)
 
 Now you're ready to install mods.
 
 
-XCOM: Enemy Unknown — disabling hash check:
-===========================================
+XCOM: Enemy Unknown — disabling hash check (Windows only):
+==========================================================
 
-If you're planning to install EU mods, you need to disable hash checks, otherwise the game won't load your modified packages. To do so, click "Tools -> Disable hash check" in PatcherGUI main menu. If game path is correct (see "Making a first step" section above), program will patch XComGame.exe and you'll see "Success!" message. If you'll see an error message, read this file again and make sure you've followed all the instructions carefully.
+If you're planning to install EU mods under Windows, you need to disable hash checks, otherwise the game won't load your modified packages. To do so, click "Tools -> Disable hash check" in PatcherGUI main menu. If game path is correct (see "Making a first step" section above), program will patch XComGame.exe and you'll see "Success!" message. If you'll see an error message, read this file again and make sure you've followed all the instructions carefully.
 
 You need to do this only once.
 
@@ -87,7 +107,7 @@ If the mod doesn't have any user-editable variables, press the "Apply" button to
 
 If installation was successful, close PatcherGUI and run the game. If an error message appears, read this file and the mod instructions carefully and try to repeat the installation. If it still fails, report a bug (see "Reporting bugs and asking questions" section later in this file).
 
-If you're installing a mod for EU, you need to disable hash check (see "XCOM: Enemy Unknown — disabling hash check" section above).
+If you're installing a mod for EU under Windows, you need to disable hash check (see "XCOM: Enemy Unknown — disabling hash check" section above).
 
 
 Uninstalling a mod:
@@ -96,7 +116,7 @@ PatcherGUI automatically creates "uninstall files" for all the installed mods. Y
 
 Multiple subsequent installations of the same mod will create multiple subsequent uninstall files: "name_of_the_original_mod_file.uninstall1.txt",
 "name_of_the_original_mod_file.uninstall2.txt",
-and so on. The very first uninstall file ("name_of_the_original_mod_file.uninstall.txt") contains vanilla code, and the others - previous modded code. So, to completely uninstall a mod: use the very first uninstall file; and to undo only the last changes to that mod, use the most recent uninstall file.
+and so on. The very first uninstall file ("name_of_the_original_mod_file.uninstall.txt") contains vanilla code, and the others - previous modded code. So, to completely uninstall a mod use the very first uninstall file and to undo only the last changes to that mod use the most recent uninstall file.
 
 
 Using a log:
@@ -115,16 +135,16 @@ If you want to revert to the vanilla game, go to Steam, right-click XCOM and sea
 To clean up PatcherGUI you need to manually cleanup the "PatcherGUI\Backup" and "PatcherGUI\Logs" folder. The "Backup" folder contains all the modified files backups and the "Logs" folder contains install logs for all the game folders.
 
 
-Enabling ini loading:
-=====================
+Enabling ini loading (Windows only):
+====================================
 
 PatcherGUI can alter game executable to enable direct loading of DefaultGameCore.ini and DefaultLoadouts.ini. Click "Tools -> Enable ini loading" in program main menu. If game path is correct (see "Making a first step" section above), program will patch current game executable and you'll see "Success!" message. If you'll see an error message, read this file again and make sure you've followed all the instructions carefully.
 
 You need to do it once for each install path (EU and EW).
 
 
-Disabling phoning home:
-=======================
+Disabling phoning home (Windows only):
+======================================
 
 PatcherGUI can disable phoning home (to stop ini files re-downloading and re-writing) by altering game executable. Click "Tools -> Disable phoning home" in program main menu. If game path is correct (see "Making a first step" section above), program will patch current game executable and you'll see "Success!" message. If you'll see an error message, read this file again and make sure you've followed all the instructions carefully.
 
@@ -134,7 +154,7 @@ You need to do it once for each install path (EU and EW).
 Using batch install/uninstall functionality:
 ============================================
 
-PatcherGUI batch files have *.pgui extension and contain a simple list of modfiles to apply, separated by end of line character. Example:
+PatcherGUI batch files have *.pgui extension and contain a simple list of modfiles to apply, separated by end of line character. Example (Windows):
 L:\Path\To\ModFile1.txt
 L:\Path\To\ModFile2.txt
 
@@ -144,7 +164,7 @@ You can generate a batch file using an install log:
 3. Click "Batch uninstaller" to generate batch uninstall file, containing uninstall file references for all the currently installed mods in reverse order. A save file dialog will pop up, allowing you to save batch file and load it into PatcherGUI.
 4. Click "Apply" button to apply all the mods, listed in batch file. Note, that for long lists this operation may take some time.
 
-You can edit batch file with PatcherGUI or Notepad and create your own batch files.
+You can edit batch file with PatcherGUI or text editor (like Notepad under Windows) and create your own batch files.
 
 
 Reporting bugs and asking questions:

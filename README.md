@@ -13,10 +13,7 @@ cd PatcherGUI/build
 cmake .
 make
 ```
-
-Proper directory structure:
-===========================
-To run PatcherGUI you need to set up a proper directory structure:
+PatcherGUI executable is placed into main project folder, so resulting directory/file structure should look like this:
 ```
 PatcherGUI/
   binaries/
@@ -26,4 +23,6 @@ PatcherGUI/
   PatcherGUI
   PatcherGUIReadme.txt
 ```
-DecompressLZO and PatchUPK are part of UPKUtils project: https://github.com/wghost/UPKUtils
+DecompressLZO and PatchUPK are part of UPKUtils project: https://github.com/wghost/UPKUtils You need to build those separately and manually place them into binaries directory.
+
+By default PatcherGUI looks for DecompressLZO and PatchUPK inside binaries directory, but this can be changed with "Advanced -> Settings" menu option.

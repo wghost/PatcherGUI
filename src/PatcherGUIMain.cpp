@@ -272,7 +272,7 @@ bool PatcherGUIFrame::SaveCFG()
             TextCtrl1->SetValue(wxGetCwd());
         cfg << TextCtrl1->GetValue() << std::endl;
         if (!wxDirExists(BackupPathString))
-            BackupPathString = wxGetCwd() + "/binaries/Backup";
+            BackupPathString = wxGetCwd() + "/backup";
         cfg << BackupPathString << std::endl;
         if (!wxFileExists(PatchUPKprogram))
             PatchUPKprogram = wxGetCwd() + "/binaries/PatchUPK";
@@ -333,7 +333,7 @@ void PatcherGUIFrame::OnSelectDirectory(wxCommandEvent& event)
         if (!wxDirExists(defDir))
             defDir = "C:/Program Files (x86)/Steam/SteamApps/common/XCom-Enemy-Unknown";
         #elif defined __WXOSX_MAC__
-        defDir = wxGetHomeDir() + "/Library/Applicationsupport/Steam/Steamapps/Common/XCom-Enemy-Unknown";
+        defDir = wxGetHomeDir() + "/Library/Application Support/Steam/SteamApps/common/XCom-Enemy-Unknown";
         #endif
         if (!wxDirExists(defDir))
             defDir = "";
