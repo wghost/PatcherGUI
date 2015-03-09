@@ -347,20 +347,19 @@ void PatcherGUIFrame::OnSelectDirectory(wxCommandEvent& event)
     TextCtrl1->SetValue(dirDialog.GetPath());
     bSelectPath = true;
     LoadLogs();
-
     StatusBar1->PushStatusText(_("Game directory changed successfully"));
 }
 
 void PatcherGUIFrame::LoadLogs()
 {
+    std::hash<std::string> StrHash;
+    curPathHash = StrHash(TextCtrl1->GetValue().ToStdString());
+
     InstList.Clear();
     UninstList.Clear();
     InstLogName = "";
 
-    std::hash<std::string> StrHash;
-    size_t HashVal = StrHash(TextCtrl1->GetValue().ToStdString());
-
-    InstLogName << wxGetCwd() << "/logs/" << HashVal << "-log.txt";
+    InstLogName << wxGetCwd() << "/logs/" << curPathHash << "-log.txt";
     if (wxFileExists(InstLogName) == false)
         return;
 
@@ -679,10 +678,16 @@ bool PatcherGUIFrame::MakeBackups()
         }
 
     wxString currBackupSubdir = "";
-    currBackupSubdir << wxGetUTCTime();
-
-    curBackupPathString = BackupPathString + wxString("/") + currBackupSubdir;
-
+    currBackupSubdir << curPathHash;
+    curBackupPathString = BackupPathString + "/" + currBackupSubdir;
+    if (!wxDirExists(curBackupPathString))
+        if(!wxMkdir(curBackupPathString))
+        {
+            wxMessageBox(_("Failed to create backup directory for current game path!"), _("Error"), wxICON_ERROR | wxOK, this);
+            return false;
+        }
+    currBackupSubdir << "/" << wxGetUTCTime();
+    curBackupPathString = BackupPathString + "/" + currBackupSubdir;
     if (!wxDirExists(curBackupPathString))
         if(!wxMkdir(curBackupPathString))
         {
@@ -817,7 +822,12 @@ void PatcherGUIFrame::OnShowLog(wxCommandEvent& event)
 {
     ViewLog dlg(this);
 
-    dlg.SetParams(TextCtrl1->GetValue(), InstList);
+    dlg.InitModList(InstList);
+    dlg.TextCtrl1->SetValue(TextCtrl1->GetValue());
+    dlg.TextCtrl2->SetValue(InstLogName);
+    wxString s = BackupPathString;
+    s << "/" << curPathHash;
+    dlg.TextCtrl3->SetValue(s);
 
     if (dlg.ShowModal() == wxID_CANCEL)
         return;

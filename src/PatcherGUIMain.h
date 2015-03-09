@@ -48,6 +48,8 @@ class PatcherGUIFrame: public wxFrame
         wxString InstLogName;
         wxString ProgLog;
 
+        size_t curPathHash;
+
         bool RestoreFromBackup();
         bool MakeBackups();
         bool RemoveSizeFiles();

@@ -20,7 +20,7 @@ class ViewLog: public wxDialog
 		ViewLog(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~ViewLog();
 
-		void SetParams(wxString GamePath, wxArrayString ModList);
+		void InitModList(wxArrayString ModList);
 		wxArrayString GetModNames(wxArrayString ModList);
 
 		int GetSelection() { return SelectionIdx; }
@@ -28,6 +28,7 @@ class ViewLog: public wxDialog
 		bool IsBatch() { return bBatch; }
 
 		//(*Declarations(ViewLog)
+		wxTextCtrl* TextCtrl3;
 		wxPanel* Panel1;
 		wxListBox* ListBox1;
 		wxButton* Button4;
@@ -35,9 +36,12 @@ class ViewLog: public wxDialog
 		wxButton* Button2;
 		wxButton* Button3;
 		wxStaticText* StaticText1;
+		wxStaticText* StaticText3;
 		wxButton* Button5;
 		wxTextCtrl* TextCtrl1;
+		wxStaticText* StaticText4;
 		wxStaticText* StaticText2;
+		wxTextCtrl* TextCtrl2;
 		//*)
 
 	protected:
@@ -47,15 +51,19 @@ class ViewLog: public wxDialog
 	    bool bBatch;
 
 		//(*Identifiers(ViewLog)
-		static const long ID_STATICTEXT1;
 		static const long ID_TEXTCTRL1;
+		static const long ID_STATICTEXT1;
+		static const long ID_TEXTCTRL2;
+		static const long ID_STATICTEXT3;
+		static const long ID_TEXTCTRL3;
+		static const long ID_STATICTEXT4;
 		static const long ID_STATICTEXT2;
 		static const long ID_LISTBOX1;
 		static const long ID_BUTTON1;
 		static const long ID_BUTTON2;
-		static const long ID_BUTTON3;
 		static const long ID_BUTTON4;
 		static const long ID_BUTTON5;
+		static const long ID_BUTTON3;
 		static const long ID_PANEL1;
 		//*)
 
