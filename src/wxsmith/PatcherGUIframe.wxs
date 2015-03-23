@@ -167,8 +167,8 @@
 					<handler function="OnDisablePhoneHome" entry="EVT_MENU" />
 				</object>
 				<object class="wxMenuItem" name="ID_MENUITEM10" variable="MenuItem7" member="yes">
-					<label>Open config folder</label>
-					<help>Open default config folder in explorer</help>
+					<label>Open config directory</label>
+					<help>Open default config directory in explorer</help>
 					<handler function="OnOpenConfigFolder" entry="EVT_MENU" />
 				</object>
 				<object class="wxMenuItem" name="ID_MENUITEM11" variable="MenuItem8" member="yes">

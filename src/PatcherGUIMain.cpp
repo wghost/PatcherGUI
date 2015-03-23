@@ -16,6 +16,7 @@
 #include <wx/filename.h>
 #include <wx/mimetype.h>
 #include <wx/textdlg.h>
+//#include <wx/datetime.h>
 #include "SettingsDialog.h"
 #include "ShowDebugLogDialog.h"
 #include "ViewLog.h"
@@ -144,7 +145,7 @@ PatcherGUIFrame::PatcherGUIFrame(wxWindow* parent,wxWindowID id)
     Menu4->Append(Menu3);
     MenuItem10 = new wxMenuItem(Menu4, ID_MENUITEM13, _("Disable phoning home"), _("Patch game executable to disable ini re-downloading"), wxITEM_NORMAL);
     Menu4->Append(MenuItem10);
-    MenuItem7 = new wxMenuItem(Menu4, ID_MENUITEM10, _("Open config folder"), _("Open default config folder in explorer"), wxITEM_NORMAL);
+    MenuItem7 = new wxMenuItem(Menu4, ID_MENUITEM10, _("Open config directory"), _("Open default config directory in explorer"), wxITEM_NORMAL);
     Menu4->Append(MenuItem7);
     MenuItem8 = new wxMenuItem(Menu4, ID_MENUITEM11, _("Show debug log"), _("Show program debug messages"), wxITEM_NORMAL);
     Menu4->Append(MenuItem8);
@@ -687,6 +688,10 @@ bool PatcherGUIFrame::MakeBackups()
             return false;
         }
     currBackupSubdir << "/" << wxGetUTCTime();
+    /*currBackupSubdir << "/" <<
+    wxString::Format("%04i-%02i-%02i.%02i-%02i-%02i",
+                     wxDateTime::GetCurrentYear(), wxDateTime::GetCurrentMonth(), wxDateTime::Now().GetDay(),
+                     wxDateTime::Now().GetHour(), wxDateTime::Now().GetMinute(), wxDateTime::Now().GetSecond());*/
     curBackupPathString = BackupPathString + "/" + currBackupSubdir;
     if (!wxDirExists(curBackupPathString))
         if(!wxMkdir(curBackupPathString))
@@ -794,9 +799,13 @@ void PatcherGUIFrame::OnChangeSettings(wxCommandEvent& event)
 {
     SettingsDialog dlg(this);
 
-    dlg.TextCtrl2->SetValue(BackupPathString);
-    dlg.TextCtrl3->SetValue(PatchUPKprogram);
-    dlg.TextCtrl1->SetValue(DecompressProgram);
+    wxFileName decompressPath(DecompressProgram);
+    wxFileName patcherPath(PatchUPKprogram);
+    wxFileName backupsPath(BackupPathString);
+
+    dlg.TextCtrl2->SetValue(backupsPath.GetFullPath());
+    dlg.TextCtrl3->SetValue(patcherPath.GetFullPath());
+    dlg.TextCtrl1->SetValue(decompressPath.GetFullPath());
 
     if (dlg.ShowModal() == wxID_CANCEL)
         return;
@@ -823,11 +832,14 @@ void PatcherGUIFrame::OnShowLog(wxCommandEvent& event)
     ViewLog dlg(this);
 
     dlg.InitModList(InstList);
-    dlg.TextCtrl1->SetValue(TextCtrl1->GetValue());
-    dlg.TextCtrl2->SetValue(InstLogName);
-    wxString s = BackupPathString;
-    s << "/" << curPathHash;
-    dlg.TextCtrl3->SetValue(s);
+
+    wxFileName gamePath(TextCtrl1->GetValue());
+    wxFileName logFile(InstLogName);
+    wxFileName backupsPath(BackupPathString + "/" + wxString::Format("%i", curPathHash));
+
+    dlg.TextCtrl1->SetValue(gamePath.GetFullPath());
+    dlg.TextCtrl2->SetValue(logFile.GetFullPath());
+    dlg.TextCtrl3->SetValue(backupsPath.GetFullPath());
 
     if (dlg.ShowModal() == wxID_CANCEL)
         return;
@@ -876,7 +888,7 @@ void PatcherGUIFrame::OnAbout(wxCommandEvent& event)
 {
     wxString msg;
     msg << _("PatcherGUI — a tool to install and maintain modifications for XCOM:EU and EW.") << "\n\n"
-        << "Current version: 6.3\n\n"
+        << "Current version: 7.0\n\n"
         << "Author: wghost81 aka Wasteland Ghost\n\n"
         << "All trademarks, mentioned herein, are properties of their respective owners.";
     wxMessageBox(msg, _("About PatcherGUI"), wxICON_INFORMATION | wxOK, this);
@@ -917,7 +929,7 @@ void PatcherGUIFrame::OnOpenConfigFolder(wxCommandEvent& event)
 
     if (!wxDirExists(configPath))
     {
-        wxMessageBox(_("Failed to find config folder!"), _("Error"), wxICON_ERROR | wxOK, this);
+        wxMessageBox(_("Failed to find config directory!"), _("Error"), wxICON_ERROR | wxOK, this);
         return;
     }
 

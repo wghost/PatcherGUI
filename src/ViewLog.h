@@ -2,13 +2,13 @@
 #define VIEWLOG_H
 
 //(*Headers(ViewLog)
-#include <wx/dialog.h>
 #include <wx/sizer.h>
-#include <wx/button.h>
-#include <wx/panel.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 #include <wx/listbox.h>
+#include <wx/panel.h>
+#include <wx/button.h>
+#include <wx/dialog.h>
 //*)
 
 #include <wx/arrstr.h>
@@ -28,20 +28,21 @@ class ViewLog: public wxDialog
 		bool IsBatch() { return bBatch; }
 
 		//(*Declarations(ViewLog)
-		wxTextCtrl* TextCtrl3;
-		wxPanel* Panel1;
-		wxListBox* ListBox1;
 		wxButton* Button4;
-		wxButton* Button1;
-		wxButton* Button2;
-		wxButton* Button3;
-		wxStaticText* StaticText1;
-		wxStaticText* StaticText3;
-		wxButton* Button5;
-		wxTextCtrl* TextCtrl1;
-		wxStaticText* StaticText4;
 		wxStaticText* StaticText2;
+		wxButton* Button1;
+		wxPanel* Panel1;
+		wxStaticText* StaticText1;
+		wxButton* Button2;
+		wxButton* Button6;
+		wxButton* Button5;
+		wxButton* Button3;
+		wxButton* Button7;
 		wxTextCtrl* TextCtrl2;
+		wxTextCtrl* TextCtrl1;
+		wxTextCtrl* TextCtrl3;
+		wxButton* Button8;
+		wxListBox* ListBox1;
 		//*)
 
 	protected:
@@ -51,12 +52,13 @@ class ViewLog: public wxDialog
 	    bool bBatch;
 
 		//(*Identifiers(ViewLog)
-		static const long ID_TEXTCTRL1;
 		static const long ID_STATICTEXT1;
+		static const long ID_TEXTCTRL1;
+		static const long ID_BUTTON6;
 		static const long ID_TEXTCTRL2;
-		static const long ID_STATICTEXT3;
+		static const long ID_BUTTON7;
 		static const long ID_TEXTCTRL3;
-		static const long ID_STATICTEXT4;
+		static const long ID_BUTTON8;
 		static const long ID_STATICTEXT2;
 		static const long ID_LISTBOX1;
 		static const long ID_BUTTON1;
@@ -77,6 +79,9 @@ class ViewLog: public wxDialog
 		void OnCloseLog(wxCommandEvent& event);
 		void OnMakeBatchInstaller(wxCommandEvent& event);
 		void OnMakeBatchUninstaller(wxCommandEvent& event);
+		void OnOpenGameDir(wxCommandEvent& event);
+		void OnOpenLogsDir(wxCommandEvent& event);
+		void OnOpenBackupsDir(wxCommandEvent& event);
 		//*)
 
 		DECLARE_EVENT_TABLE()

@@ -1,7 +1,7 @@
 PatcherGUI - a tool to install and maintain modifications for XCOM:EU and EW
 ============================================================================
 
-The information below is intended for mod-users mostly. If you're a mod developer, please, consult "PatchUPK_Readme.txt" file, included in the program archive. It contains all the information needed to create mod files for use with PatchUPK/PatcherGUI.
+The information below is intended for mod-users mostly. If you're a mod developer, please, consult "PatchUPK_Readme.txt" file, included in the program distribution. It contains all the information needed to create mod files for use with PatchUPK/PatcherGUI.
 
 
 Program features:
@@ -17,8 +17,9 @@ Program features:
 - Has an option to disable hash checks for XCOM:EU (Windows only).
 - Has an option to enable direct ini loading (Windows only).
 - Has an option to disable phoning home (ini re-downloading) (Windows only).
-- Batch installing and uninstalling mods.
-- Cross-platform: works with Windows, Linux and Mac XCOM versions.
+- Can perform batch install and uninstall operations.
+- Cross-platform: works with Windows, Linux and Mac XCOM versions
+  (under Linux and Mac program should be built from source code).
 
 
 Quick overview:
@@ -37,6 +38,11 @@ This approach is a bit less user-friendly than a final GUI tool with sliders and
 
 Linux and Mac differences:
 ==========================
+There are no pre-built PatcherGUI binaries for Linux and Mac, so you will have to build them yourself. Both GUI and core utilities are open-source and are available via GitHub:
+https://github.com/wghost/PatcherGUI
+https://github.com/wghost/UPKUtils
+Both projects contain README.md file with description and detailed build instructions.
+
 Both Linux and Mac releases do not perform upk hash check, so disabling it is not required.
 
 You can disable phoning home (automatic ini re-downloading) by editing hosts file. For Linux it is usually located at /etc/hosts. Open it (administrator access is required) and add two following lines inside:
@@ -63,9 +69,7 @@ http://wiki.tesnexus.com/index.php/Installing_Games_on_Windows_Vista%2B
 
 Second thing you should do is to switch off automatic updates for XCOM in Steam. Right-click XCOM in the Steam applications list and search it's properties for "updates" options. Note, that turning auto-updates off will not prevent Steam from downloading a newly released patch, but it will prevent silent updates running in the background and breaking your game.
 
-Third thing to do is to stop the game from "phoning home". Each time you launch XCOM it "calls" to Firaxis' servers and downloads some "ini" files to prevent multiplayer cheating. If you're planning to make modifications to game "ini" files (like the "Arc Thrower in Pistol Slot" tweak), you need to block those server's IP addresses in your system's hosts file. Instructions on how to do this can be found here:
-http://wiki.tesnexus.com/index.php/Steam_and_mods#Modifying_hosts_file
-Note that you will most probably need administrator access to do this. Also note that some anti-virus programs under Windows automatically protect the hosts file, so you'll probably need to temporarily turn off your anti-virus software.
+Third thing to do is to stop the game from "phoning home". Each time you launch XCOM it "calls" to Firaxis' servers and downloads some "ini" files to prevent multiplayer cheating. If you're planning to make modifications to game "ini" files (like the "Arc Thrower in Pistol Slot" tweak), you need to disable "phoning home" feature. You can now do it with PatcherGUI using "Tools -> Disable Phoning Home" option (Windows only, for Linux and Mac see "Linux and Mac differences" section above).
 
 For more information on how to install mods for XCOM, please, consult these wiki articles:
 http://wiki.tesnexus.com/index.php/Basic_Guide_to_installing_mods
@@ -74,7 +78,7 @@ http://wiki.tesnexus.com/index.php/Steam_and_mods
 
 Making a first step:
 ====================
-Download the latest PatcherGUI archive and unpack it to any folder without locale-specific (i.e. "unicode") symbols in the path. "C:\" or "C:\XCOM-Mods-and-Utils" will do nicely under Windows. Under Linux and Mac put it under your home directory.
+Download the latest PatcherGUI distribution and unpack it to any folder without locale-specific (i.e. "unicode") symbols in the path. "C:\" or "C:\XCOM-Mods-and-Utils" will do nicely under Windows. Under Linux and Mac you should build the program (see "Linux and Mac differences" section above) and put it under your home directory.
 
 Open the folder where you unpacked PatcherGUI and run "PatcherGUI" executable ("PatcherGUI.exe" under Windows). You can create a desktop link to the executable by the usual OS means if you want.
 
@@ -92,7 +96,7 @@ If you're planning to install EU mods under Windows, you need to disable hash ch
 
 You need to do this only once.
 
-Note: "Disable hash check" option disables hash check for the four most commonly used packages: core.upk, engine.upk, xcomgame.upk and xcomstrategygame.upk. If a specific mod uses other package, you need to disable it separately via "Advanced -> Disable hash..." option in main menu.
+Note: "Disable hash check" option disables hash check for the four most commonly used packages: core.upk, engine.upk, xcomgame.upk and xcomstrategygame.upk. If a specific mod uses some other package, you need to disable it separately via "Advanced -> Disable hash..." option in main menu.
 
 
 Installing a mod:
@@ -103,7 +107,7 @@ Run PatcherGUI and use a second "Browse" button (one with "Open mod file" tool-t
 
 If you haven't yet set a path to your XCOM:EU or XCOM:EW folder, do it now (see "Making a first step" section above).
 
-If the mod doesn't have any user-editable variables, press the "Apply" button to install it. If mod provides some configurable options, consult the mod's "Readme" file on how to set it up properly.
+If the mod doesn't have any user-editable variables, press the "Apply" button to install it. If the mod provides some configurable options, consult the mod's "Readme" file on how to set it up properly.
 
 If installation was successful, close PatcherGUI and run the game. If an error message appears, read this file and the mod instructions carefully and try to repeat the installation. If it still fails, report a bug (see "Reporting bugs and asking questions" section later in this file).
 
@@ -123,7 +127,7 @@ Using a log:
 ============
 PatcherGUI writes an install log for each of your game folders (you'll have separate install logs for EU and EW). You may access that log by pressing the "Show log" button.
 
-The log window contains info on the current install path and a list of all installed mods for that path (names of the corresponding mod files). For each of the listed mods you can load it's installer or uninstaller file into PatcherGUI by pressing the corresponding "Load Installer" or "Load Uninstaller" button.
+The log window contains info on current install directories and a list of all installed mods for the current path (names of the corresponding mod files). For each of the listed mods you can load it's installer or uninstaller file into PatcherGUI by pressing the corresponding "Load Installer" or "Load Uninstaller" button.
 
 When you install a mod, it's automatically added to the install list. When you uninstall a mod, it's automatically removed from the list.
 

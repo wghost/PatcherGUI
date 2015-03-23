@@ -13,7 +13,21 @@
 						<growablecols>0</growablecols>
 						<growablerows>3</growablerows>
 						<object class="sizeritem">
+							<object class="wxStaticText" name="ID_STATICTEXT1" variable="StaticText1" member="yes">
+								<label>Directories:</label>
+							</object>
+							<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+							<border>5</border>
+							<option>1</option>
+						</object>
+						<object class="spacer">
+							<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+							<border>5</border>
+							<option>1</option>
+						</object>
+						<object class="sizeritem">
 							<object class="wxTextCtrl" name="ID_TEXTCTRL1" variable="TextCtrl1" member="yes">
+								<tooltip>Game path</tooltip>
 								<style>wxTE_READONLY</style>
 							</object>
 							<flag>wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
@@ -21,15 +35,18 @@
 							<option>1</option>
 						</object>
 						<object class="sizeritem">
-							<object class="wxStaticText" name="ID_STATICTEXT1" variable="StaticText1" member="yes">
-								<label>Game path</label>
+							<object class="wxButton" name="ID_BUTTON6" variable="Button6" member="yes">
+								<label>Game directory</label>
+								<tooltip>Open game directory</tooltip>
+								<handler function="OnOpenGameDir" entry="EVT_BUTTON" />
 							</object>
-							<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+							<flag>wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
 							<border>5</border>
 							<option>1</option>
 						</object>
 						<object class="sizeritem">
 							<object class="wxTextCtrl" name="ID_TEXTCTRL2" variable="TextCtrl2" member="yes">
+								<tooltip>Log file</tooltip>
 								<style>wxTE_READONLY</style>
 							</object>
 							<flag>wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
@@ -37,15 +54,18 @@
 							<option>1</option>
 						</object>
 						<object class="sizeritem">
-							<object class="wxStaticText" name="ID_STATICTEXT3" variable="StaticText3" member="yes">
-								<label>Log file</label>
+							<object class="wxButton" name="ID_BUTTON7" variable="Button7" member="yes">
+								<label>Logs directory</label>
+								<tooltip>Open logs directory</tooltip>
+								<handler function="OnOpenLogsDir" entry="EVT_BUTTON" />
 							</object>
-							<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+							<flag>wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
 							<border>5</border>
 							<option>1</option>
 						</object>
 						<object class="sizeritem">
 							<object class="wxTextCtrl" name="ID_TEXTCTRL3" variable="TextCtrl3" member="yes">
+								<tooltip>Backups path</tooltip>
 								<style>wxTE_READONLY</style>
 							</object>
 							<flag>wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
@@ -53,10 +73,12 @@
 							<option>1</option>
 						</object>
 						<object class="sizeritem">
-							<object class="wxStaticText" name="ID_STATICTEXT4" variable="StaticText4" member="yes">
-								<label>Backup path</label>
+							<object class="wxButton" name="ID_BUTTON8" variable="Button8" member="yes">
+								<label>Backups directory</label>
+								<tooltip>Open backups directory</tooltip>
+								<handler function="OnOpenBackupsDir" entry="EVT_BUTTON" />
 							</object>
-							<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+							<flag>wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
 							<border>5</border>
 							<option>1</option>
 						</object>
