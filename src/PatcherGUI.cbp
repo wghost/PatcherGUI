@@ -34,7 +34,7 @@
 			<Add option="`wx-config --cxxflags`" />
 		</Compiler>
 		<Linker>
-			<Add option="`wx-config --libs std,richtext`" />
+			<Add option="`wx-config --libs richtext,xml,html,adv,core,base`" />
 		</Linker>
 		<Unit filename="PatcherGUIApp.cpp" />
 		<Unit filename="PatcherGUIApp.h" />

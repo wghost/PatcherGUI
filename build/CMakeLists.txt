@@ -9,7 +9,7 @@ SET(EXECUTABLE_OUTPUT_PATH ..)
 IF(wxWidgets_USE_MONOLITHIC)
 	SET(wxWidgets_USE_LIBS mono richtext)
 ELSE(wxWidgets_USE_MONOLITHIC)
-	SET(wxWidgets_USE_LIBS base core richtext)
+	SET(wxWidgets_USE_LIBS richtext xml html adv core base)
 ENDIF(wxWidgets_USE_MONOLITHIC)
 
 FIND_PACKAGE(wxWidgets)
