@@ -835,7 +835,7 @@ void PatcherGUIFrame::OnShowLog(wxCommandEvent& event)
 
     wxFileName gamePath(TextCtrl1->GetValue());
     wxFileName logFile(InstLogName);
-    wxFileName backupsPath(BackupPathString + "/" + wxString::Format("%i", curPathHash));
+    wxFileName backupsPath(BackupPathString + "/" + wxString::Format("%u", curPathHash));
 
     dlg.TextCtrl1->SetValue(gamePath.GetFullPath());
     dlg.TextCtrl2->SetValue(logFile.GetFullPath());
@@ -888,7 +888,7 @@ void PatcherGUIFrame::OnAbout(wxCommandEvent& event)
 {
     wxString msg;
     msg << _("PatcherGUI — a tool to install and maintain modifications for XCOM:EU and EW.") << "\n\n"
-        << "Current version: 7.0\n\n"
+        << "Current version: 7.3\n\n"
         << "Author: wghost81 aka Wasteland Ghost\n\n"
         << "All trademarks, mentioned herein, are properties of their respective owners.";
     wxMessageBox(msg, _("About PatcherGUI"), wxICON_INFORMATION | wxOK, this);
