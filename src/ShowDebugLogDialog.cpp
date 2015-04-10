@@ -1,9 +1,9 @@
 #include "ShowDebugLogDialog.h"
 
 //(*InternalHeaders(ShowDebugLogDialog)
+#include <wx/intl.h>
 #include <wx/button.h>
 #include <wx/string.h>
-#include <wx/intl.h>
 //*)
 
 //(*IdInit(ShowDebugLogDialog)
@@ -19,9 +19,9 @@ END_EVENT_TABLE()
 ShowDebugLogDialog::ShowDebugLogDialog(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxSize& size)
 {
 	//(*Initialize(ShowDebugLogDialog)
-	wxFlexGridSizer* FlexGridSizer1;
 	wxBoxSizer* BoxSizer2;
 	wxBoxSizer* BoxSizer1;
+	wxFlexGridSizer* FlexGridSizer1;
 	wxStdDialogButtonSizer* StdDialogButtonSizer1;
 
 	Create(parent, id, _("Debug Log"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE, _T("id"));

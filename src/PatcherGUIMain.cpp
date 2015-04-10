@@ -276,10 +276,20 @@ bool PatcherGUIFrame::SaveCFG()
             BackupPathString = wxGetCwd() + "/backup";
         cfg << BackupPathString << std::endl;
         if (!wxFileExists(PatchUPKprogram))
+        {
             PatchUPKprogram = wxGetCwd() + "/binaries/PatchUPK";
+            #if defined __WXMSW__
+            PatchUPKprogram += ".exe";
+            #endif
+        }
         cfg << PatchUPKprogram << std::endl;
         if (!wxFileExists(DecompressProgram))
+        {
             DecompressProgram = wxGetCwd() + "/binaries/DecompressLZO";
+            #if defined __WXMSW__
+            DecompressProgram += ".exe";
+            #endif
+        }
         cfg << DecompressProgram << std::endl;
         return true;
     }
@@ -330,9 +340,28 @@ void PatcherGUIFrame::OnSelectDirectory(wxCommandEvent& event)
         #ifdef __WXGTK__
         defDir = wxGetHomeDir() + "/.local/share/Steam/SteamApps/common/XCom-Enemy-Unknown";
         #elif defined __WXMSW__
+        //check all the possible standard locations under Windows
         defDir = "C:/Program Files/Steam/SteamApps/common/XCom-Enemy-Unknown";
         if (!wxDirExists(defDir))
+        {
             defDir = "C:/Program Files (x86)/Steam/SteamApps/common/XCom-Enemy-Unknown";
+            if (!wxDirExists(defDir))
+            {
+                defDir = "C:/Steam/SteamApps/common/XCom-Enemy-Unknown";
+                if (!wxDirExists(defDir))
+                {
+                    defDir = "D:/Steam/SteamApps/common/XCom-Enemy-Unknown";
+                    if (!wxDirExists(defDir))
+                    {
+                        defDir = "C:/SteamLibrary/SteamApps/common/XCom-Enemy-Unknown";
+                        if (!wxDirExists(defDir))
+                        {
+                            defDir = "D:/SteamLibrary/SteamApps/common/XCom-Enemy-Unknown";
+                        }
+                    }
+                }
+            }
+        }
         #elif defined __WXOSX_MAC__
         defDir = wxGetHomeDir() + "/Library/Application Support/Steam/SteamApps/common/XCom-Enemy-Unknown";
         #endif

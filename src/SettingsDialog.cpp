@@ -6,8 +6,8 @@
 #include <fstream>
 
 //(*InternalHeaders(SettingsDialog)
-#include <wx/string.h>
 #include <wx/intl.h>
+#include <wx/string.h>
 //*)
 
 //(*IdInit(SettingsDialog)
@@ -31,9 +31,9 @@ END_EVENT_TABLE()
 SettingsDialog::SettingsDialog(wxWindow* parent,wxWindowID id)
 {
 	//(*Initialize(SettingsDialog)
-	wxFlexGridSizer* FlexGridSizer1;
 	wxBoxSizer* BoxSizer2;
 	wxBoxSizer* BoxSizer1;
+	wxFlexGridSizer* FlexGridSizer1;
 	wxStdDialogButtonSizer* StdDialogButtonSizer1;
 
 	Create(parent, id, _("Program settings"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE, _T("id"));
