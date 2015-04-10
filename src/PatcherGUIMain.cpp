@@ -864,7 +864,8 @@ void PatcherGUIFrame::OnShowLog(wxCommandEvent& event)
 
     wxFileName gamePath(TextCtrl1->GetValue());
     wxFileName logFile(InstLogName);
-    wxFileName backupsPath(BackupPathString + "/" + wxString::Format("%u", curPathHash));
+    wxString tmpStr(BackupPathString + "/"); tmpStr << curPathHash;
+    wxFileName backupsPath(tmpStr);
 
     dlg.TextCtrl1->SetValue(gamePath.GetFullPath());
     dlg.TextCtrl2->SetValue(logFile.GetFullPath());
