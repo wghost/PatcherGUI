@@ -1,0 +1,267 @@
+#!/bin/bash -ue
+#
+# PatcherGUI installer for Debian/Ubuntu
+#
+#    Copyright (C) 2015 Rodrigo Silva (MestreLion) <linux@rodrigosilva.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>
+
+# TODO:
+# - Uninstaller
+
+
+# Default options -------------------------------------------------------------
+
+# Install root path
+rootdir=${XDG_DATA_HOME:-"$HOME"/.local/share}/PatcherGUI
+
+# Paths and URL for UPKUtils source
+upkgiturl=https://github.com/wghost/UPKUtils.git
+
+# Desktop files base dir (relative to $rootdir)
+desktopbase=desktop
+
+# Uninstall flag
+uninstall=0
+
+# Other options
+verbose=1
+force=0
+yes=0
+
+
+# Constants and other globals -------------------------------------------------
+
+myname=${0##*/}
+mydir=$(dirname "$(readlink -f "$0")")
+
+# Desktop integration
+xdgdir="$rootdir"/"$desktopbase"
+deskfile="$xdgdir"/patchergui.desktop
+
+# Icons
+icondir="$mydir"/icons
+iconfile="$mydir"/favicon.ico
+iconname=patchergui
+
+# Destination files
+exec="$rootdir"/PatcherGUI
+guifiles=(
+	"$mydir"/LICENSE
+	"$mydir"/PatcherGUIReadme.txt
+	"$mydir"/favicon.ico
+	"$mydir"/PatcherGUI
+)
+
+# UPKUtils
+upkdir="$mydir"/UPKUtils
+exedir="$rootdir"/binaries
+upkfiles=(
+	"$upkdir"/build/PatchUPK
+	"$upkdir"/build/DecompressLZO
+)
+
+
+# ---
+
+uninstaller=0
+
+
+# Generic helper functions ----------------------------------------------------
+
+bold()    { tput bold; printf '%s' "$@"; tput sgr0; }
+red()     { tput setaf 1; bold "$@"; }
+green()   { tput setaf 2; bold "$@"; }
+
+fatal()   { if (($#)); then echo "$(red '* ' "$@")" >&2; fi; exit 1; }
+message() { if ((verbose)); then echo "$(green '* ' "$@")"; fi; }
+argerr()  { echo "$myname: erro${1:+: $(printf '%s' "$@")}" >&2 ; usage 1 ; }
+invalid() { argerr "invalid option: $1" ; }
+missing() { argerr "missing operand${1:+ em '$1'}." ; }
+integer() { [[ "${1:-}" != *[!0-9]* ]] ||
+            argerr "'$1' is not a valid positive integer."; }
+yesno()   { if (($1)); then green "Yes"; else red "No"; fi; }
+linefeed(){ ((verbose)) && echo; }
+cmdpath() { type -P "$1"; }
+exists()  { type "$@" >/dev/null 2>&1; }
+ppath()   { printf '%q' "$@"; }
+
+confirm()
+{
+	local msg=$(bold "${@:-"Confirm?"}")
+	local default=$(bold "NO")
+	local reply
+
+	if ! ((yes)); then
+		read -p "* $msg (y/n, default $default): " reply
+		reply="${reply:-$default}"
+		case "$reply" in
+			[Yy]*) ;;
+			*) message "Canceled"; exit 1;;
+		esac
+	fi
+}
+
+require() {
+	local cmd="$1"
+	shift
+	local packages="${@:-$cmd}"
+	local reqmsg="$myname requires '$cmd'"
+
+	if exists "$cmd"; then return; fi
+
+	exists apt-get || fatal "$reqmsg, please install it and try again."
+	confirm "$reqmsg, want to install packages?" \
+		" (need administrator priviledges)"
+	message "Installing package ${packages[@]}"
+	sudo apt-get install -y "${packages[@]}" ||
+		fatal "Error installing packages (did you cancel it?)"
+}
+
+# Custom helper functions -----------------------------------------------------
+
+require_wx() {
+	local wxpackage=libwxgtk3.0-dev
+
+	# Is a suitable libwxgtk already installed?
+	if exists wx-config && ! [[ "$(wx-config --version)" < "3.0" ]]; then
+		return
+	fi
+
+	local reqmsg="$myname requires wxWidgets library v3.0+"
+	local urlmsg=("install it from repositories or visit" \
+		"https://www.wxwidgets.org/downloads and try again.")
+	local errmsg="Unable to install wxWidgets library, ${urlmsg[@]}"
+	local sudomsg="Error installing wxWidgets library (did you cancel it?)"
+
+	# can we install it?
+	exists apt-cache apt-get || fatal "$reqmsg, ${urlmsg[@]}"
+	confirm "$reqmsg, want to install it? (need administrator priviledges)"
+
+	# Is it available from repositories?
+	if ! apt-cache show "$wxpackage" >/dev/null 2>&1; then
+		# distro and requirements check
+		exists lsb_release apt-key apt-add-repository || fatal "$errmsg"
+		local url=http://repos.codelite.org
+		local distro=$(lsb_release -si)
+		case "${distro,,}" in
+			ubuntu|debian);;
+			linuxmint) distro=ubuntu;;
+			*) fatal "$errmsg";;
+		esac
+
+		# add the upstream repository
+		message "Adding upstream repository from '$url'" \
+			" this might take a while..."
+		sudo apt-key adv --fetch-keys "$url/CodeLite.asc" &&
+		sudo apt-add-repository "$url/wx3.0/${distro,,}/ universe" &&
+		sudo apt-get update -qq ||
+			fatal "$sudomsg"
+	fi
+
+	# install it
+	message "Installing wxWidgets"
+	sudo apt-get install -y "$wxpackage" || fatal "$sudomsg"
+}
+
+build_upk() (
+	# subshell is needed so `cd` has no effect outside the function
+
+	local builddir="${1:-.}"
+	cd -- "$builddir"
+
+	# C++11 standard was only introduced in g++ v4.8
+	# For older versions we use the closest available standard, C++0x
+	if [[ "$(g++ --version | awk '{print $NF; exit}')" < "4.8" ]]; then
+		sed -i 's/-std=c++11/-std=c++0x/g' CMakeLists.txt
+	fi
+
+	cmake . && make ||
+		fatal "Error building, check the output and try again"
+)
+
+install_icons() {
+	local sourcedir="$1"
+	local targetdir="$2"
+	local iconfile="$3"
+	local iconname="$4"
+	local icon title size
+
+	mkdir -p -- "$targetdir"
+
+	if ! { [[ -d "$sourcedir" ]] &&
+		message "Copying icons from '$sourcedir'" &&
+		cp -- "$sourcedir"/"$iconname"-*.png "$targetdir" 2>/dev/null; }
+	then
+		message "Extracting icons from '$iconfile'"
+		convert -set filename:area '%w' -- "$iconfile" \
+			"$targetdir"/"$iconname-%[filename:area].png"
+	fi
+
+	for icon in "$targetdir"/"$iconname"-*.png; do
+		title=${icon%.*}
+		size=${title##*-}
+		xdg-icon-resource install --noupdate --novendor \
+			--size "$size" "$icon" "$iconname"
+	done
+	xdg-icon-resource forceupdate
+}
+
+# Main procedures and logic ---------------------------------------------------
+
+message "Installing Patcher GUI"
+
+require cmake
+require g++
+require convert imagemagick
+require_wx
+
+if ! [[ -d "$upkdir" ]]; then
+	message "Downloading UPKUtils"
+	require git git
+	git clone "$upkgiturl" "$upkdir"
+fi
+
+message "Building UPKUtils"
+build_upk "$upkdir"/build
+
+message "Building Patcher GUI"
+build_upk "$mydir"/build
+
+message "Installing files to '$rootdir'"
+mkdir -p -- "$rootdir" && cp -- "${guifiles[@]}" "$rootdir"
+mkdir -p -- "$exedir"  && cp -- "${upkfiles[@]}" "$exedir"
+
+install_icons "$icondir" "$xdgdir" "$iconfile" "$iconname"
+
+message "Installing menu entry"
+mkdir -p -- "$xdgdir"
+cat > "$deskfile" <<-_EOF_
+	[Desktop Entry]
+	Version=1.0
+	Type=Application
+	Name=XCOM UPK Patcher
+	GenericName=PatcherGUI
+	Comment=UPK Patcher GUI for XCOM: Enemy Unknown and Enemy Within
+	Categories=Game;
+	Terminal=false
+	StartupNotify=true
+	StartupWMClass=PatcherGUI
+	Icon=patchergui
+	Path=$(ppath "$rootdir")
+	Exec=$(ppath "$exec") %F
+_EOF_
+xdg-desktop-menu install --novendor "$deskfile"
+
+message "Done!"
