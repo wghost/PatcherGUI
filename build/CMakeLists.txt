@@ -12,7 +12,7 @@ ELSE(wxWidgets_USE_MONOLITHIC)
 	SET(wxWidgets_USE_LIBS richtext xml html adv core base)
 ENDIF(wxWidgets_USE_MONOLITHIC)
 
-FIND_PACKAGE(wxWidgets)
+FIND_PACKAGE(wxWidgets REQUIRED COMPONENTS core richtext)
 IF(wxWidgets_FOUND)
 	INCLUDE(${wxWidgets_USE_FILE})
 	ADD_EXECUTABLE(PatcherGUI ../src/PatcherGUIApp.cpp ../src/PatcherGUIApp.h ../src/PatcherGUIMain.cpp ../src/PatcherGUIMain.h ../src/SettingsDialog.cpp ../src/SettingsDialog.h ../src/ShowDebugLogDialog.cpp ../src/ShowDebugLogDialog.h ../src/ViewLog.cpp ../src/ViewLog.h)
